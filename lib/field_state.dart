@@ -1,27 +1,30 @@
 import 'package:dynamic_forms/form_field_configuration.dart';
+import 'package:dynamic_forms/form_field_types/text_field.dart';
+import 'package:dynamic_forms/form_field_types/text_field_base.dart';
 import 'package:flutter/material.dart';
 
 
 
 /// This is the base class of any form field state
-abstract base class FormFieldState<T> extends ChangeNotifier {
+abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
 
-  FormFieldState({
+  static const String KEY_REQUIRED = "required";
+  static const String KEY_KEY = "key";
+  static const String KEY_INITIAL_VALUE = "default_value";
+
+  DynamicFormFieldState({
     required this.key,
     required this.configuration,
     T? initialValue,
-    List<FormFieldState>? dependencies,
+
     this.isRequired = true,
-  }) : _error = null, _value = initialValue, _dependencies = dependencies ?? const [];
+  }) : _error = null, _value = initialValue;
 
   final String key;
   final FormFieldConfiguration configuration;
 
   /// An required field will be validated (Default is true)
   final bool isRequired;
-
-  /// If a field depends on other, it will only be available once all [dependencies] are valid
-  final List<FormFieldState> _dependencies;
 
   T? _value;
   String? _error;
@@ -30,7 +33,7 @@ abstract base class FormFieldState<T> extends ChangeNotifier {
   String? get error => _error;
 
   bool get hasError => _error != null && _error!.isNotEmpty;
-  bool get enabled => _dependencies.every((element) => element.isValid());
+ // bool get enabled => _dependencies.every((element) => element.isValid());
 
   set value(T? value) {
     _value = value;
@@ -59,55 +62,18 @@ abstract base class FormFieldState<T> extends ChangeNotifier {
   ///
   /// This can be useful for changing and building forms just by adding/removing/editing
   /// a database json file that represents the required form fields
-  factory FormFieldState.fromJSON(Map<String, dynamic> json) {
-    throw UnimplementedError();
-  }
+  factory DynamicFormFieldState.fromJSON(Map<String, dynamic> json) {
 
-}
+    var fieldType = FormFieldType.fromString(json[FormFieldConfiguration.KEY_FIELD_TYPE]);
 
-final class TextFieldState extends FormFieldState<String> {
-
-  TextFieldState({
-    required super.key,
-    required super.initialValue,
-    required super.configuration,
-    super.isRequired,
-  }) : super();
-
-  @override
-  TextFormFieldConfiguration get configuration => super.configuration as TextFormFieldConfiguration;
-
-
-  /// A normal text field is always valid
-  @override
-  bool isValid() => true;
-
-}
-
-final class EmailFieldState extends FormFieldState<String> {
-
-  static const Pattern _pattern =
-      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-  final RegExp regex = RegExp(_pattern as String);
-
-  EmailFieldState({
-    required super.key,
-    required super.initialValue,
-    required super.configuration,
-    super.isRequired,
-  });
-
-  /// A normal text field is always valid
-  @override
-  bool isValid() {
-    if (value == null) return false;
-    if (!regex.hasMatch(value!)) {
-      error = 'Email inválido';
-      return false;
-    } else {
-      error = null;
-      return true;
+    switch (fieldType) {
+      case FormFieldType.textField: return BaseTextFieldState.fromJSON(json) as DynamicFormFieldState<T>;
+      case FormFieldType.checkbox: throw UnimplementedError();
+      case FormFieldType.switcher: throw UnimplementedError();
+      case FormFieldType.dropdownMenu: throw UnimplementedError();
     }
+
+
   }
 
 }
