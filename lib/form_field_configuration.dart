@@ -1,7 +1,13 @@
 
-import 'package:dynamic_forms/form_field_types/text_field_base.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:dynamic_forms/form_field_types/checkbox_field.dart';
+import 'package:dynamic_forms/form_field_types/dropdown_field.dart';
+import 'package:dynamic_forms/form_field_types/switcher_field.dart';
+import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
+
+export 'form_field_types/dropdown_field.dart';
+export 'form_field_types/switcher_field.dart';
+export 'form_field_types/text_fields/text_field_base.dart';
+export 'form_field_types/checkbox_field.dart';
 
 enum FormFieldType {
   textField("text_field"),
@@ -24,8 +30,8 @@ enum FormFieldType {
 base class FormFieldConfiguration {
 
   static const String KEY_FIELD_TYPE = "field_type";
-  static const String KEY_LABEL_TYPE = "label";
-  static const String KEY_FLEX_TYPE = "flex";
+  static const String KEY_LABEL = "label";
+  static const String KEY_FLEX = "flex";
 
   final FormFieldType formType;
 
@@ -59,81 +65,5 @@ base class FormFieldConfiguration {
 
 
 
-/*
-final class TextFormFieldConfiguration extends FormFieldConfiguration {
-
-  static const INPUT_TYPE_KEY = "input_type";
-  static const HINT_KEY = "hint";
-  static const OBSCURE_KEY = "obscure";
-  static const SUFFIX_KEY = "suffix";
 
 
-  /// If not defined, the label value will be used
-  final String? hint;
-
-  /// The input data type (Default is text)
-  final TextInputType inputType;
-
-  final IconData? suffixIcon;
-
-  const TextFormFieldConfiguration({
-    super.label,
-    this.hint,
-    TextFormInputType inputType = TextFormInputType.text,
-    super.flex,
-    this.suffixIcon,
-  }) : inputType = inputType, super(
-    formType: FormFieldType.textField,
-  );
-
-  static const TextFormFieldConfiguration factory = TextFormFieldConfiguration();
-
-  factory TextFormFieldConfiguration.fromJSON(Map<String, dynamic> data) {
-    throw UnimplementedError();
-  }
-
-}
-
- */
-
-final class SwitcherFieldConfiguration extends FormFieldConfiguration {
-
-  const SwitcherFieldConfiguration({
-    super.label,
-  }) : super(
-    formType: FormFieldType.switcher,
-  );
-
-  factory SwitcherFieldConfiguration.fromJSON(Map<String, dynamic> data) {
-    throw UnimplementedError();
-  }
-
-}
-
-final class CheckboxFieldConfiguration extends FormFieldConfiguration {
-
-  const CheckboxFieldConfiguration({
-    super.label,
-  }) : super(
-    formType: FormFieldType.checkbox,
-  );
-
-  factory CheckboxFieldConfiguration.fromJSON(Map<String, dynamic> data) {
-    throw UnimplementedError();
-  }
-
-}
-
-final class DropdownFieldConfiguration extends FormFieldConfiguration {
-
-  const DropdownFieldConfiguration({
-    super.label,
-  }) : super(
-    formType: FormFieldType.dropdownMenu,
-  );
-
-  factory DropdownFieldConfiguration.fromJSON(Map<String, dynamic> data) {
-    throw UnimplementedError();
-  }
-
-}

@@ -1,8 +1,6 @@
-import 'package:dynamic_forms/form_field_types/text_field_base.dart';
+import 'package:dynamic_forms/dynamic_forms.dart';
+import 'package:dynamic_forms/field_state.dart';
 import 'package:flutter/services.dart';
-
-
-import '../field_state.dart';
 
 final class TextFieldConfiguration extends BaseTextFormFieldConfiguration {
 
@@ -23,11 +21,11 @@ final class TextFieldConfiguration extends BaseTextFormFieldConfiguration {
 
   factory TextFieldConfiguration.fromJSON(Map<String, dynamic> json) {
     return TextFieldConfiguration(
-      label: json["label"],
-      flex: json["flex"],
-      hint: json["hint"],
-      regexFormatterPattern: json["formatter"],
-      suffixIcon: json["icon"]
+      label: json[FormFieldConfiguration.KEY_LABEL],
+      flex: json[FormFieldConfiguration.KEY_FLEX],
+      hint: json[BaseTextFormFieldConfiguration.HINT_KEY],
+      regexFormatterPattern: json[BaseTextFormFieldConfiguration.FORMATTER_KEY],
+      suffixIcon: json[BaseTextFormFieldConfiguration.SUFFIX_KEY]
     );
   }
 
@@ -35,13 +33,12 @@ final class TextFieldConfiguration extends BaseTextFormFieldConfiguration {
 
 final class TextFieldState extends BaseTextFieldState {
 
-
   TextFieldState({
     required super.key,
     super.initialValue,
-    super.configuration = TextFieldConfiguration.factory,
+    TextFieldConfiguration configuration = TextFieldConfiguration.factory,
     super.isRequired,
-  }) : super();
+  }) : super(configuration: configuration);
 
    factory TextFieldState.fromJSON(Map<String, dynamic> json) => TextFieldState(
        key: json[DynamicFormFieldState.KEY_KEY],
@@ -50,10 +47,23 @@ final class TextFieldState extends BaseTextFieldState {
        configuration: TextFieldConfiguration.fromJSON(json)
    );
 
-  /// A normal text field is always valid
+
   @override
-  bool isValid() {
-    return true;
+  bool get isValid => value != null && value!.isNotEmpty;
+
+  @override
+  bool validate([String invalidMsg = "Campo inválido"]) {
+    /*
+    if (value == null && error == null) return false;
+    if (value == null && error != null) error = null;
+    if (isRequired && value == null) error ??= "Campo obrigatório";
+    if (value != null) error = null;
+
+
+     */
+
+    return isValid;
   }
+
 
 }

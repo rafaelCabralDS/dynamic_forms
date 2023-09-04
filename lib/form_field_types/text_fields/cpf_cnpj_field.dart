@@ -1,18 +1,11 @@
 import 'package:dynamic_forms/field_state.dart';
-import 'package:dynamic_forms/form_field_types/text_field_base.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 final class CpfFieldConfiguration extends BaseTextFormFieldConfiguration {
 
-  @override
-  MaskTextInputFormatter get formatter => MaskTextInputFormatter(
-      mask: '###.###.###-##',
-      filter: { "#": RegExp(r'[0-9]') },
-      type: MaskAutoCompletionType.lazy
-  );
 
-  const CpfFieldConfiguration({
+   CpfFieldConfiguration({
     super.label = "CPF",
     super.flex,
     super.hint = "000.000.000-00",
@@ -21,9 +14,14 @@ final class CpfFieldConfiguration extends BaseTextFormFieldConfiguration {
     inputType: TextInputType.number,
     type: AvailableTextFieldInputTypes.cpf,
     isObscure: false,
+    formatter: MaskTextInputFormatter(
+        mask: '###.###.###-##',
+        filter: { "#": RegExp(r'[0-9]') },
+        type: MaskAutoCompletionType.lazy
+    )
   );
 
-  static const factory = CpfFieldConfiguration();
+  static final factory = CpfFieldConfiguration();
 
   factory CpfFieldConfiguration.fromJSON(Map<String, dynamic> json) {
     return CpfFieldConfiguration(
@@ -38,15 +36,7 @@ final class CpfFieldConfiguration extends BaseTextFormFieldConfiguration {
 
 final class CnpjFieldConfiguration extends BaseTextFormFieldConfiguration {
 
-
-  @override
-  MaskTextInputFormatter get formatter => MaskTextInputFormatter(
-      mask: '##.###.###/####-##',
-      filter: { "#": RegExp(r'[0-9]') },
-      type: MaskAutoCompletionType.eager
-  );
-
-  const CnpjFieldConfiguration({
+  CnpjFieldConfiguration({
     super.label = "CNPJ",
     super.flex,
     super.hint = "00.000.000/0000-00",
@@ -55,10 +45,14 @@ final class CnpjFieldConfiguration extends BaseTextFormFieldConfiguration {
     inputType: TextInputType.number,
     type: AvailableTextFieldInputTypes.cnpj,
     isObscure: false,
-    //formatter: formatter
+    formatter: MaskTextInputFormatter(
+        mask: '##.###.###/####-##',
+        filter: { "#": RegExp(r'[0-9]') },
+        type: MaskAutoCompletionType.eager
+    )
   );
 
-  static const factory = CnpjFieldConfiguration();
+  static final factory = CnpjFieldConfiguration();
 
   factory CnpjFieldConfiguration.fromJSON(Map<String, dynamic> json) {
     return CnpjFieldConfiguration(
@@ -76,9 +70,9 @@ final class CpfFieldState extends BaseTextFieldState {
   CpfFieldState({
     required super.key,
     super.initialValue,
-    super.configuration = CpfFieldConfiguration.factory,
+    CpfFieldConfiguration? configuration,
     super.isRequired,
-  }) : super();
+  }) : super(configuration: configuration ?? CpfFieldConfiguration.factory);
 
 
   factory CpfFieldState.fromJSON(Map<String, dynamic> json) => CpfFieldState(
@@ -91,8 +85,8 @@ final class CpfFieldState extends BaseTextFieldState {
 
   /// A normal text field is always valid
   @override
-  bool isValid() {
-    return (configuration as CpfFieldConfiguration).formatter.getUnmaskedText().length == 11;
+  bool get isValid {
+    return (configuration as CpfFieldConfiguration).formatter!.getUnmaskedText().length == 11;
   }
 
 }
@@ -103,9 +97,9 @@ final class CnpjFieldState extends BaseTextFieldState {
   CnpjFieldState({
     required super.key,
     super.initialValue,
-    super.configuration = CnpjFieldConfiguration.factory,
+    CnpjFieldConfiguration? configuration,
     super.isRequired,
-  }) : super();
+  }) : super(configuration: configuration ?? CnpjFieldConfiguration.factory);
 
   factory CnpjFieldState.fromJSON(Map<String, dynamic> json) => CnpjFieldState(
       key: json[DynamicFormFieldState.KEY_KEY],
@@ -117,8 +111,8 @@ final class CnpjFieldState extends BaseTextFieldState {
 
   /// A normal text field is always valid
   @override
-  bool isValid() {
-    return ((configuration as CnpjFieldConfiguration).formatter).getUnmaskedText().length == 14;
+  bool get isValid {
+    return ((configuration as CnpjFieldConfiguration).formatter)!.getUnmaskedText().length == 14;
   }
 
 }

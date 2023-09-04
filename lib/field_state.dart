@@ -1,9 +1,8 @@
 import 'package:dynamic_forms/form_field_configuration.dart';
-import 'package:dynamic_forms/form_field_types/text_field.dart';
-import 'package:dynamic_forms/form_field_types/text_field_base.dart';
+import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
 import 'package:flutter/material.dart';
 
-
+export 'form_field_types/text_fields/text_field_base.dart';
 
 /// This is the base class of any form field state
 abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
@@ -45,7 +44,17 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isValid();
+  /// Only returns if the field is valid or not, it does not change the state to error if it is not
+  bool get isValid;
+
+  /// A method to override if you want to auto update the error state if the field is not valid
+  bool validate([String invalidMsg = "Campo inválido"]) {
+    if (value == null) return false;
+    if (isValid && error != null) error = null;
+    if (!isValid && error == null) error = invalidMsg;
+
+    return isValid;
+  }
 
   /// Clear any error and value from the field
   void reset() {
@@ -53,6 +62,15 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  /// Similar to addListener, but take a function that gets its own current state
+  void listenItself(void Function(DynamicFormFieldState state) listener) {
+    addListener(() {
+      listener(this);
+    });
+  }
+
+
 
   MapEntry<String, T?> asJsonEntry() => MapEntry(key, value);
 
@@ -68,9 +86,9 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
 
     switch (fieldType) {
       case FormFieldType.textField: return BaseTextFieldState.fromJSON(json) as DynamicFormFieldState<T>;
-      case FormFieldType.checkbox: throw UnimplementedError();
+      case FormFieldType.checkbox: return CheckboxFieldState.fromJSON(json) as DynamicFormFieldState<T>;
       case FormFieldType.switcher: throw UnimplementedError();
-      case FormFieldType.dropdownMenu: throw UnimplementedError();
+      case FormFieldType.dropdownMenu: return DropdownFieldState.fromJSON(json) as DynamicFormFieldState<T>;
     }
 
 

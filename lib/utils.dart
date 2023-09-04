@@ -53,3 +53,18 @@ class SeparatedColumn extends StatelessWidget {
     );
   }
 }
+
+extension ListExtension<E> on List<E> {
+  List<E> removeAll(Iterable<E> allToRemove) {
+    for (var element in allToRemove) {
+      remove(element);
+    }
+    return this;
+  }
+
+  List<E> getDuplicates() {
+    List<E> dupes = List.from(this);
+    dupes.removeAll(toSet().toList());
+    return dupes;
+  }
+}

@@ -1,12 +1,10 @@
 import 'package:dynamic_forms/field_state.dart';
-import 'package:dynamic_forms/form_field_types/text_field_base.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 
 final class PasswordFieldConfiguration extends BaseTextFormFieldConfiguration {
   const PasswordFieldConfiguration({
-    super.label,
+    super.label = "Senha",
     super.flex,
     super.hint,
   }) : super(
@@ -41,11 +39,12 @@ final class PasswordFieldState extends BaseTextFieldState {
 
   PasswordFieldState({
     required super.key,
-    super.configuration = PasswordFieldConfiguration.factory
+    PasswordFieldConfiguration configuration = PasswordFieldConfiguration.factory
   }) : super(
     isRequired: true,
     initialValue: null,
-    hidden: true
+    hidden: true,
+    configuration: configuration
   );
 
   factory PasswordFieldState.fromJSON(Map<String, dynamic> json) => PasswordFieldState(
@@ -54,45 +53,31 @@ final class PasswordFieldState extends BaseTextFieldState {
   );
 
 
-  /*
-  //bool get hidden ;
   @override
-  set hidden(bool isHidden) {
-    if (hidden == isHidden) return;
-    hidden = isHidden;
-    notifyListeners();
-  }
+  bool get isValid {
 
-   */
-
-  @override
-  bool isValid() {
-
-    bool onError = false;
     if (value == null || value!.isEmpty || value!.length < 6) {
-      error = passwordCriteria;
       return false;
     }
-
-    // gpt generated
-    for (int i = 0; i < value!.length; i++) {
-      if (onError) break;
-      final char = value![i];
-      if (char.contains(RegExp(r'[a-zA-Z]'))) {
-        onError = true;
-      } else if (char.contains(RegExp(r'[0-9]'))) {
-        onError = true;
-      } else if (char.contains(RegExp(r'[!@#$%^&*()_+{}\[\]:;<>,.?~\\|-]'))) {
-        onError = true;
-      }
-    }
-
-    if (onError) {
-      error = passwordCriteria;
+    const Pattern pattern = r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$";
+    if (!RegExp(pattern as String).hasMatch(value!)) {
       return false;
     }
 
     return true;
+  }
+
+  @override
+  bool validate([String? invalidMsg = "Campo inválido"]) {
+    if (value == null) return false;
+    if (!isValid && error == null) {
+      error = passwordCriteria;
+    }
+    if (isValid && error != null) {
+      error = null;
+    }
+
+    return isValid;
   }
 
 }

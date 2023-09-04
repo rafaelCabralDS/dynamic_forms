@@ -1,15 +1,14 @@
-
-
-
 import 'package:dynamic_forms/field_state.dart';
 import 'package:dynamic_forms/form_field_configuration.dart';
-import 'package:dynamic_forms/form_field_types/cpf_cnpj_field.dart';
-import 'package:dynamic_forms/form_field_types/email_field.dart';
-import 'package:dynamic_forms/form_field_types/password_field.dart';
-import 'package:dynamic_forms/form_field_types/phone_field.dart';
-import 'package:dynamic_forms/form_field_types/text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+
+export 'text_field.dart';
+export 'password_field.dart';
+export 'email_field.dart';
+export 'cpf_cnpj_field.dart';
+export 'phone_field.dart';
+
 
 enum AvailableTextFieldInputTypes {
   text("text"),
@@ -54,7 +53,7 @@ base class BaseTextFormFieldConfiguration extends FormFieldConfiguration {
   /// @see [PasswordState]
   final bool? isObscure;
 
-  final TextInputFormatter? formatter;
+  final MaskTextInputFormatter? formatter;
 
   const BaseTextFormFieldConfiguration({
     required this.type,
@@ -93,9 +92,9 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
     required super.key,
     super.initialValue,
     super.isRequired,
-    required super.configuration,
+    required BaseTextFormFieldConfiguration configuration,
     bool hidden = false,
-  }) : _hidden = hidden, super();
+  }) : _hidden = hidden, super(configuration: configuration);
 
 
   // States that can change this parameter, must implement the setters
