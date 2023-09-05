@@ -21,6 +21,9 @@ final class CpfFieldConfiguration extends BaseTextFormFieldConfiguration {
     )
   );
 
+   @override
+   MaskTextInputFormatter get formatter => super.formatter as MaskTextInputFormatter;
+
   static final factory = CpfFieldConfiguration();
 
   factory CpfFieldConfiguration.fromJSON(Map<String, dynamic> json) {
@@ -52,6 +55,9 @@ final class CnpjFieldConfiguration extends BaseTextFormFieldConfiguration {
     )
   );
 
+  @override
+  MaskTextInputFormatter get formatter => super.formatter as MaskTextInputFormatter;
+
   static final factory = CnpjFieldConfiguration();
 
   factory CnpjFieldConfiguration.fromJSON(Map<String, dynamic> json) {
@@ -75,6 +81,7 @@ final class CpfFieldState extends BaseTextFieldState {
   }) : super(configuration: configuration ?? CpfFieldConfiguration.factory);
 
 
+
   factory CpfFieldState.fromJSON(Map<String, dynamic> json) => CpfFieldState(
       key: json[DynamicFormFieldState.KEY_KEY],
       initialValue: json[DynamicFormFieldState.KEY_INITIAL_VALUE],
@@ -83,10 +90,13 @@ final class CpfFieldState extends BaseTextFieldState {
   );
 
 
+  @override
+  CpfFieldConfiguration get configuration => super.configuration as CpfFieldConfiguration;
+
   /// A normal text field is always valid
   @override
   bool get isValid {
-    return (configuration as CpfFieldConfiguration).formatter!.getUnmaskedText().length == 11;
+    return configuration.formatter.getUnmaskedText().length == 11;
   }
 
 }
@@ -108,11 +118,14 @@ final class CnpjFieldState extends BaseTextFieldState {
       configuration: CnpjFieldConfiguration.fromJSON(json)
   );
 
+  @override
+  CnpjFieldConfiguration get configuration => super.configuration as CnpjFieldConfiguration;
+
 
   /// A normal text field is always valid
   @override
   bool get isValid {
-    return ((configuration as CnpjFieldConfiguration).formatter)!.getUnmaskedText().length == 14;
+    return configuration.formatter.getUnmaskedText().length == 14;
   }
 
 }

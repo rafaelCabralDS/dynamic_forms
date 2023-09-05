@@ -68,3 +68,9 @@ extension ListExtension<E> on List<E> {
     return dupes;
   }
 }
+
+extension StringExtension on String {
+
+  bool get isDigit => int.tryParse(this) != null;
+
+}

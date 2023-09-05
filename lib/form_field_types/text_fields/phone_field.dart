@@ -20,6 +20,9 @@ final class PhoneFieldConfiguration extends BaseTextFormFieldConfiguration {
     )
   );
 
+  @override
+  MaskTextInputFormatter? get formatter => super.formatter as MaskTextInputFormatter;
+
   static final factory = PhoneFieldConfiguration();
 
   factory PhoneFieldConfiguration.fromJSON(Map<String, dynamic> json) {

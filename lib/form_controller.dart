@@ -63,7 +63,15 @@ class DynamicFormController {
   List<DynamicFormFieldState> get requiredFields =>  fields.expand((element) => element).where((element) => element.isRequired).toList();
   List<DynamicFormFieldState> get optionalFields =>  fields.expand((element) => element).where((element) => !element.isRequired).toList();
 
-  DynamicFormFieldState findByKey(String key) => fields.expand((element) => element).singleWhere((element) => element.key == key);
+  DynamicFormFieldState findByKey(String key) {
+
+    try {
+      return fields.expand((element) => element).singleWhere((element) => element.key == key);
+    } catch (_) {
+      throw Exception("There is no $key value on the current controller");
+    }
+
+  }
 
   bool validate({bool validateInBatch = true}) {
 
@@ -87,8 +95,6 @@ class DynamicFormController {
       node.addListener(() => entry.value(node));
     }
   }
-
-
 
 
 }

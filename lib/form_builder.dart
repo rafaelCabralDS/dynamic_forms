@@ -1,4 +1,5 @@
 import 'package:dynamic_forms/form_controller.dart';
+import 'package:dynamic_forms/form_field_types/text_fields/date_field.dart';
 import 'package:dynamic_forms/utils.dart';
 import 'package:flutter/material.dart' hide FormFieldBuilder, FormFieldState;
 import 'field_state.dart';
@@ -15,13 +16,14 @@ typedef CpfFormFieldBuilder = Widget Function(CpfFieldState field);
 typedef CnpjFormFieldBuilder = Widget Function(CnpjFieldState field);
 typedef PhoneFormFieldBuilder = Widget Function(PhoneFieldState field);
 typedef EmailFormFieldBuilder = Widget Function(EmailFieldState field);
+typedef DateTextFormFieldBuilder = Widget Function(DateTextFieldState field);
 
 typedef CheckboxFormFieldBuilder = Widget Function(CheckboxFieldState field);
 typedef DropdownFormFieldBuilder<T extends Object> = Widget Function(DropdownFieldState<T> field);
 
 class DynamicForm extends StatefulWidget {
 
-  final DynamicFormController controller;
+  final List<DynamicFormController> controllers;
 
   /// If defined, all non defined specific field builder will fallback
   /// on this builder. Otherwise, they fall into [DefaultTextFieldBuilder]
@@ -34,6 +36,7 @@ class DynamicForm extends StatefulWidget {
   final CnpjFormFieldBuilder? cnpjFieldBuilder;
   final CheckboxFormFieldBuilder? checkboxFieldBuilder;
   final DropdownFormFieldBuilder? dropdownFieldBuilder;
+  final DateTextFormFieldBuilder? dateTextFormFieldBuilder;
 
   /// A map that overrides the default fields builders for specific field
   /// by the key value
@@ -45,8 +48,8 @@ class DynamicForm extends StatefulWidget {
   /// How the title and subtitle will be built
   final FormHeaderBuilder? formHeader;
 
-  const DynamicForm({super.key,
-    required this.controller,
+  DynamicForm({super.key,
+    required DynamicFormController controller,
     this.defaultTextFormFieldBuilder,
     this.textFieldBuilder,
     this.passwordFieldBuilder,
@@ -60,7 +63,28 @@ class DynamicForm extends StatefulWidget {
     this.customFieldsBuilder,
     this.checkboxFieldBuilder,
     this.dropdownFieldBuilder,
+    this.dateTextFormFieldBuilder,
+  }) : controllers = List.from([controller]);
+
+  const DynamicForm.multiple({super.key,
+    required this.controllers,
+    this.defaultTextFormFieldBuilder,
+    this.textFieldBuilder,
+    this.passwordFieldBuilder,
+    this.cnpjFieldBuilder,
+    this.cpfFieldBuilder,
+    this.emailFieldBuilder,
+    this.phoneFieldBuilder,
+    this.runningSpacing = 10.0,
+    this.verticalSpacing = 10.0,
+    this.formHeader,
+    this.customFieldsBuilder,
+    this.checkboxFieldBuilder,
+    this.dropdownFieldBuilder,
+    this.dateTextFormFieldBuilder,
   });
+
+
 
   @override
   State<DynamicForm> createState() => _DynamicFormState();
@@ -97,6 +121,10 @@ class _DynamicFormState extends State<DynamicForm> {
     return widget.emailFieldBuilder?.call(state) ?? _buildDefaultTextField(state);
   }
 
+  Widget _buildDateField(DateTextFieldState state) {
+    return widget.dateTextFormFieldBuilder?.call(state) ?? _buildDefaultTextField(state);
+  }
+
 
   Widget _buildRow(List<DynamicFormFieldState> fields) => SeparatedRow(
     data: fields,
@@ -124,6 +152,7 @@ class _DynamicFormState extends State<DynamicForm> {
                     case AvailableTextFieldInputTypes.email: return _buildEmailField(state as EmailFieldState);
                     case AvailableTextFieldInputTypes.cnpj: return _buildCnpjField(state as CnpjFieldState);
                     case AvailableTextFieldInputTypes.cpf: return _buildCpfField(state as CpfFieldState);
+                    case AvailableTextFieldInputTypes.date: return _buildDateField(state as DateTextFieldState);
                   }
 
                 case FormFieldType.switcher: throw UnimplementedError();
@@ -140,26 +169,31 @@ class _DynamicFormState extends State<DynamicForm> {
     separatorBuilder: (_,i) => SizedBox(width: widget.runningSpacing),
   );
 
+  Widget _buildSingleForm(FormModel form) {
 
-  @override
-  Widget build(BuildContext context) {
     return Column(
       children: [
 
-        
-          widget.formHeader?.call(widget.controller.form) ?? defaultFormHeaderBuilder(widget.controller.form),
+        widget.formHeader?.call(form) ?? _DefaultFormHeaderBuilder(form: form),
 
         SeparatedColumn(
-          data: widget.controller.fields,
-          itemBuilder: (_,i) => _buildRow(widget.controller.fields[i]),
+          data: form.fields,
+          itemBuilder: (_,i) => _buildRow(form.fields[i]),
           separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
         ),
       ],
     );
   }
-}
 
-Widget defaultFormHeaderBuilder(FormModel model) => _DefaultFormHeaderBuilder(form: model);
+  @override
+  Widget build(BuildContext context) {
+    return SeparatedColumn(
+      data: widget.controllers,
+      itemBuilder: (_,i) => _buildSingleForm(widget.controllers[i].form),
+      separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
+    );
+  }
+}
 
 class _DefaultFormHeaderBuilder extends StatelessWidget {
 
@@ -178,7 +212,7 @@ class _DefaultFormHeaderBuilder extends StatelessWidget {
         if (form.desc != null)
           Text(form.desc!, style: Theme.of(context).textTheme.labelMedium),
 
-        Divider(
+        const Divider(
           height: 30.0,
         )
       ],

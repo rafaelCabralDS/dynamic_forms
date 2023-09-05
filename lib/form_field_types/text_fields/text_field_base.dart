@@ -1,6 +1,8 @@
 import 'package:dynamic_forms/field_state.dart';
 import 'package:dynamic_forms/form_field_configuration.dart';
+import 'package:dynamic_forms/form_field_types/text_fields/date_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 export 'text_field.dart';
@@ -16,6 +18,7 @@ enum AvailableTextFieldInputTypes {
   cpf("cpf"),
   cnpj("cnpj"),
   email("email"),
+  date("date"),
   phone("phone");
 
   final String key;
@@ -53,7 +56,7 @@ base class BaseTextFormFieldConfiguration extends FormFieldConfiguration {
   /// @see [PasswordState]
   final bool? isObscure;
 
-  final MaskTextInputFormatter? formatter;
+  final TextInputFormatter? formatter;
 
   const BaseTextFormFieldConfiguration({
     required this.type,
@@ -79,6 +82,7 @@ base class BaseTextFormFieldConfiguration extends FormFieldConfiguration {
       case AvailableTextFieldInputTypes.cpf: return CpfFieldConfiguration.fromJSON(json);
       case AvailableTextFieldInputTypes.cnpj: return CnpjFieldConfiguration.fromJSON(json);
       case AvailableTextFieldInputTypes.phone: return PhoneFieldConfiguration.fromJSON(json);
+      case AvailableTextFieldInputTypes.date: return DateTextFieldConfiguration.fromJSON(json);
     }
 
   }
@@ -121,6 +125,7 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
       case AvailableTextFieldInputTypes.cpf: return CpfFieldState.fromJSON(json);
       case AvailableTextFieldInputTypes.cnpj: return CnpjFieldState.fromJSON(json);
       case AvailableTextFieldInputTypes.phone: return PhoneFieldState.fromJSON(json);
+      case AvailableTextFieldInputTypes.date: return DateTextFieldState.fromJSON(json);
     }
 
   }

@@ -15,9 +15,11 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
     required this.key,
     required this.configuration,
     T? initialValue,
-
-    this.isRequired = true,
-  }) : _error = null, _value = initialValue;
+    bool? isRequired,
+  }) :
+        _error = null,
+        _value = initialValue,
+        isRequired = isRequired ?? true;
 
   final String key;
   final FormFieldConfiguration configuration;
@@ -63,10 +65,10 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Similar to addListener, but take a function that gets its own current state
-  void listenItself(void Function(DynamicFormFieldState state) listener) {
+  /// Similar to addListener, but take a function that gets its own current state value
+  void listenItself(void Function(T? stateValue) listener) {
     addListener(() {
-      listener(this);
+      listener(value);
     });
   }
 
