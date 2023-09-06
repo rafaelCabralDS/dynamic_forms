@@ -3,7 +3,7 @@ import 'package:dynamic_forms/form_field_configuration.dart';
 import 'package:dynamic_forms/form_field_types/text_fields/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+
 
 export 'text_field.dart';
 export 'password_field.dart';
@@ -14,6 +14,8 @@ export 'phone_field.dart';
 
 enum AvailableTextFieldInputTypes {
   text("text"),
+  integer("integer"),
+  decimal("decimal"),
   password("password"),
   cpf("cpf"),
   cnpj("cnpj"),
@@ -46,9 +48,6 @@ base class BaseTextFormFieldConfiguration extends FormFieldConfiguration {
   /// If not defined, the label value will be used
   final String? hint;
 
-  /// The input data type (Default is text)
-  final TextInputType inputType;
-
   final IconData? suffixIcon; // how should i describe an suffixIcon as a json? Should i describe it at all?
 
   /// If true, tells the builder that it can be obscure or not.
@@ -62,7 +61,6 @@ base class BaseTextFormFieldConfiguration extends FormFieldConfiguration {
     required this.type,
     super.label,
     this.hint,
-    required this.inputType,
     super.flex,
     this.suffixIcon,
     required this.isObscure,
@@ -83,6 +81,8 @@ base class BaseTextFormFieldConfiguration extends FormFieldConfiguration {
       case AvailableTextFieldInputTypes.cnpj: return CnpjFieldConfiguration.fromJSON(json);
       case AvailableTextFieldInputTypes.phone: return PhoneFieldConfiguration.fromJSON(json);
       case AvailableTextFieldInputTypes.date: return DateTextFieldConfiguration.fromJSON(json);
+      case AvailableTextFieldInputTypes.integer: return TextFieldConfiguration.fromJSON(json);
+      case AvailableTextFieldInputTypes.decimal: return TextFieldConfiguration.fromJSON(json);
     }
 
   }
@@ -120,6 +120,8 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
 
     switch (fieldType) {
       case AvailableTextFieldInputTypes.text: return TextFieldState.fromJSON(json);
+      case AvailableTextFieldInputTypes.integer: return TextFieldState.fromJSON(json);
+      case AvailableTextFieldInputTypes.decimal: return TextFieldState.fromJSON(json);
       case AvailableTextFieldInputTypes.email: return EmailFieldState.fromJSON(json);
       case AvailableTextFieldInputTypes.password: return PasswordFieldState.fromJSON(json);
       case AvailableTextFieldInputTypes.cpf: return CpfFieldState.fromJSON(json);
@@ -179,8 +181,7 @@ class _DefaultTextFieldBuilderState extends State<DefaultTextFieldBuilder> {
         controller: _editingController,
         onChanged: (v) => widget.state.value = v,
         obscureText: widget.state.hidden,
-        inputFormatters: widget.state.configuration.formatter != null ? [widget.state.configuration.formatter!] : null ,
-
+        inputFormatters: widget.state.configuration.formatter != null ? [widget.state.configuration.formatter!] : null,
         //enabled: ,
         decoration: InputDecoration(
             labelText: widget.state.configuration.label ?? widget.state.key,

@@ -8,7 +8,6 @@ final class PasswordFieldConfiguration extends BaseTextFormFieldConfiguration {
     super.flex,
     super.hint,
   }) : super(
-          inputType: TextInputType.text,
           type: AvailableTextFieldInputTypes.password,
           isObscure: true,
           formatter: null,

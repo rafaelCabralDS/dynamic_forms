@@ -4,7 +4,7 @@ import 'package:dynamic_forms/form_field_configuration.dart';
 import 'package:flutter/material.dart';
 
 
-final class DropdownFieldConfiguration<E> extends FormFieldConfiguration {
+final class DropdownFieldConfiguration<E extends Object> extends FormFieldConfiguration {
 
   static const String KEY_HINT = "hint";
 
@@ -12,7 +12,7 @@ final class DropdownFieldConfiguration<E> extends FormFieldConfiguration {
 
   /// You can override the default value.toString() default label by providing
   /// a list of strings with the same size of the options
-  final String Function(E)? customLabel;
+  final String Function(dynamic)? customLabel;
 
   const DropdownFieldConfiguration({
     super.label,

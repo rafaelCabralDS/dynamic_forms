@@ -1,8 +1,10 @@
 
 
-import 'dart:math';
+import 'dart:math' as math;
 
+import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SeparatedRow extends StatelessWidget {
   final List data;
@@ -18,7 +20,7 @@ class SeparatedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: List.generate(max(0, data.length * 2 - 1), (index) {
+      children: List.generate(math.max(0, data.length * 2 - 1), (index) {
         final int itemIndex = index ~/ 2;
         if (index.isEven) {
           return itemBuilder(context, itemIndex);
@@ -43,7 +45,7 @@ class SeparatedColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(max(0, data.length * 2 - 1), (index) {
+      children: List.generate(math.max(0, data.length * 2 - 1), (index) {
         final int itemIndex = index ~/ 2;
         if (index.isEven) {
           return itemBuilder(context, itemIndex);
@@ -73,4 +75,62 @@ extension StringExtension on String {
 
   bool get isDigit => int.tryParse(this) != null;
 
+}
+
+extension TextInputTypeExtension on String? {
+
+  TextInputFormatter? get asFormatter {
+
+    if (this == AvailableTextFieldInputTypes.integer.key) {
+      return FilteringTextInputFormatter.digitsOnly;
+    }
+
+    if (this == AvailableTextFieldInputTypes.decimal.key) {
+      return const DecimalTextInputFormatter(decimalRange: 2);
+    }
+
+    return null;
+  }
+
+}
+
+
+class DecimalTextInputFormatter extends TextInputFormatter {
+  const DecimalTextInputFormatter({required this.decimalRange})
+      : assert(decimalRange == null || decimalRange > 0);
+
+  final int? decimalRange;
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, // unused.
+      TextEditingValue newValue,
+      ) {
+    TextSelection newSelection = newValue.selection;
+    String truncated = newValue.text;
+
+    if (decimalRange != null) {
+      String value = newValue.text;
+
+      if (value.contains(".") &&
+          value.substring(value.indexOf(".") + 1).length > decimalRange!) {
+        truncated = oldValue.text;
+        newSelection = oldValue.selection;
+      } else if (value == ".") {
+        truncated = "0.";
+
+        newSelection = newValue.selection.copyWith(
+          baseOffset: math.min(truncated.length, truncated.length + 1),
+          extentOffset: math.min(truncated.length, truncated.length + 1),
+        );
+      }
+
+      return TextEditingValue(
+        text: truncated,
+        selection: newSelection,
+        composing: TextRange.empty,
+      );
+    }
+    return newValue;
+  }
 }

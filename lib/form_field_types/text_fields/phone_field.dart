@@ -10,7 +10,6 @@ final class PhoneFieldConfiguration extends BaseTextFormFieldConfiguration {
     super.hint = "(00) 00000 - 0000",
     super.suffixIcon = Icons.phone_rounded
   }) : super(
-    inputType: TextInputType.number,
     type: AvailableTextFieldInputTypes.phone,
     isObscure: false,
     formatter: MaskTextInputFormatter(

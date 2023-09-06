@@ -23,7 +23,7 @@ typedef DropdownFormFieldBuilder<T extends Object> = Widget Function(DropdownFie
 
 class DynamicForm extends StatefulWidget {
 
-  final List<DynamicFormController> controllers;
+  final FormController controller;
 
   /// If defined, all non defined specific field builder will fallback
   /// on this builder. Otherwise, they fall into [DefaultTextFieldBuilder]
@@ -47,9 +47,10 @@ class DynamicForm extends StatefulWidget {
 
   /// How the title and subtitle will be built
   final FormHeaderBuilder? formHeader;
+  final FormHeaderBuilder? subformHeader;
 
-  DynamicForm({super.key,
-    required DynamicFormController controller,
+  const DynamicForm({super.key,
+    required this.controller,
     this.defaultTextFormFieldBuilder,
     this.textFieldBuilder,
     this.passwordFieldBuilder,
@@ -64,27 +65,8 @@ class DynamicForm extends StatefulWidget {
     this.checkboxFieldBuilder,
     this.dropdownFieldBuilder,
     this.dateTextFormFieldBuilder,
-  }) : controllers = List.from([controller]);
-
-  const DynamicForm.multiple({super.key,
-    required this.controllers,
-    this.defaultTextFormFieldBuilder,
-    this.textFieldBuilder,
-    this.passwordFieldBuilder,
-    this.cnpjFieldBuilder,
-    this.cpfFieldBuilder,
-    this.emailFieldBuilder,
-    this.phoneFieldBuilder,
-    this.runningSpacing = 10.0,
-    this.verticalSpacing = 10.0,
-    this.formHeader,
-    this.customFieldsBuilder,
-    this.checkboxFieldBuilder,
-    this.dropdownFieldBuilder,
-    this.dateTextFormFieldBuilder,
+    this.subformHeader,
   });
-
-
 
   @override
   State<DynamicForm> createState() => _DynamicFormState();
@@ -129,7 +111,8 @@ class _DynamicFormState extends State<DynamicForm> {
   Widget _buildRow(List<DynamicFormFieldState> fields) => SeparatedRow(
     data: fields,
     itemBuilder: (_,i) => Builder(
-      builder: (context) {
+        //key: UniqueKey(),
+        builder: (context) {
 
         var state = fields[i];
         return Expanded(
@@ -147,6 +130,8 @@ class _DynamicFormState extends State<DynamicForm> {
 
                   switch ((state as BaseTextFieldState).configuration.type) {
                     case AvailableTextFieldInputTypes.text: return _buildTextField(state as TextFieldState);
+                    case AvailableTextFieldInputTypes.integer: return _buildTextField(state as TextFieldState);
+                    case AvailableTextFieldInputTypes.decimal: return _buildTextField(state as TextFieldState);
                     case AvailableTextFieldInputTypes.password: return _buildPasswordField(state as PasswordFieldState);
                     case AvailableTextFieldInputTypes.phone: return _buildPhoneField(state as PhoneFieldState);
                     case AvailableTextFieldInputTypes.email: return _buildEmailField(state as EmailFieldState);
@@ -169,31 +154,80 @@ class _DynamicFormState extends State<DynamicForm> {
     separatorBuilder: (_,i) => SizedBox(width: widget.runningSpacing),
   );
 
-  Widget _buildSingleForm(FormModel form) {
+  /// Build for every [FormModel] subform in the parent [FormModel] form controller
+  Widget _buildSubform(FormModel subform) {
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        SizedBox(height: widget.verticalSpacing),
+
+        widget.subformHeader?.call(subform) ?? _DefaultSubFormHeaderBuilder(subform: subform),
+
+        //SizedBox(height: widget.verticalSpacing),
+
+        SeparatedColumn(
+          data: subform.fields,
+          itemBuilder: (_,i) => _buildRow(subform.fields[i]),
+          separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
+        ),
+
+
+      ],
+    );
+
+  }
+
+  /// Build only once per controller
+  Widget _buildForm(FormModel form) {
 
     return Column(
       children: [
 
-        widget.formHeader?.call(form) ?? _DefaultFormHeaderBuilder(form: form),
+        if (form.title != null || form.desc != null)
+          widget.formHeader?.call(form) ?? _DefaultFormHeaderBuilder(form: form),
 
         SeparatedColumn(
           data: form.fields,
           itemBuilder: (_,i) => _buildRow(form.fields[i]),
           separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
         ),
+
+        SeparatedColumn(
+          data: form.subforms ?? [],
+          itemBuilder: (_,i) => _buildSubform(form.subforms![i]),
+          separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
+        ),
+
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SeparatedColumn(
-      data: widget.controllers,
-      itemBuilder: (_,i) => _buildSingleForm(widget.controllers[i].form),
-      separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
-    );
+
+
+    if (widget.controller is MultipleFormController) {
+
+      return AnimatedBuilder(
+        animation: widget.controller as MultipleFormController,
+        builder: (context, child) {
+          var forms = (widget.controller as MultipleFormController).forms;
+          return SeparatedColumn(
+            data: forms,
+            itemBuilder: (_,i) => _buildForm(forms[i]),
+            separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
+          );
+        }
+      );
+    } else {
+      return _buildForm((widget.controller as SingleFormController).form);
+    }
+
   }
 }
+
 
 class _DefaultFormHeaderBuilder extends StatelessWidget {
 
@@ -215,6 +249,29 @@ class _DefaultFormHeaderBuilder extends StatelessWidget {
         const Divider(
           height: 30.0,
         )
+      ],
+    );
+  }
+}
+
+class _DefaultSubFormHeaderBuilder extends StatelessWidget {
+
+  final FormModel subform;
+  const _DefaultSubFormHeaderBuilder({super.key, required this.subform});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        if (subform.title != null)
+          Text(subform.title!, style: Theme.of(context).textTheme.headlineSmall),
+
+        if (subform.desc != null)
+          Text(subform.desc!, style: Theme.of(context).textTheme.labelSmall),
+
+
       ],
     );
   }

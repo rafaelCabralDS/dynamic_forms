@@ -12,7 +12,6 @@ final class EmailFieldConfiguration extends BaseTextFormFieldConfiguration {
     super.hint,
     super.suffixIcon = Icons.email_rounded,
   }) : super(
-    inputType: TextInputType.emailAddress,
     type: AvailableTextFieldInputTypes.email,
     isObscure: false,
   );

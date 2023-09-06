@@ -11,7 +11,6 @@ final class CpfFieldConfiguration extends BaseTextFormFieldConfiguration {
     super.hint = "000.000.000-00",
     super.suffixIcon
   }) : super(
-    inputType: TextInputType.number,
     type: AvailableTextFieldInputTypes.cpf,
     isObscure: false,
     formatter: MaskTextInputFormatter(
@@ -45,7 +44,6 @@ final class CnpjFieldConfiguration extends BaseTextFormFieldConfiguration {
     super.hint = "00.000.000/0000-00",
     super.suffixIcon
   }) : super(
-    inputType: TextInputType.number,
     type: AvailableTextFieldInputTypes.cnpj,
     isObscure: false,
     formatter: MaskTextInputFormatter(

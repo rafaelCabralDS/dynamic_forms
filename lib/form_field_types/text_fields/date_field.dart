@@ -25,7 +25,6 @@ final class DateTextFieldConfiguration extends BaseTextFormFieldConfiguration {
     required DateTime minDate,
     required DateTime maxDate,
   }) : minDate = minDate, maxDate = maxDate,super(
-      inputType: TextInputType.number,
       type: AvailableTextFieldInputTypes.date,
       isObscure: false,
       formatter: DateTextFormatter(minYear: minDate.year, maxYear: maxDate.year),
@@ -39,7 +38,6 @@ final class DateTextFieldConfiguration extends BaseTextFormFieldConfiguration {
   }) :  maxDate = DateTime(3000),
         minDate = DateTime(1),
         super(
-      inputType: TextInputType.number,
       type: AvailableTextFieldInputTypes.date,
       isObscure: false,
         formatter: DateTextFormatter(minYear: 1, maxYear: 3000),
@@ -54,7 +52,6 @@ final class DateTextFieldConfiguration extends BaseTextFormFieldConfiguration {
   }) :    maxDate = DateTime(3000),
           minDate = DateTime.now(),
   super(
-      inputType: TextInputType.number,
       type: AvailableTextFieldInputTypes.date,
       isObscure: false,
       formatter: DateTextFormatter(minYear: DateTime.now().year, maxYear: 3000),
@@ -68,7 +65,6 @@ final class DateTextFieldConfiguration extends BaseTextFormFieldConfiguration {
   }) :  maxDate = DateTime.now(),
         minDate = DateTime(1),
         super(
-        inputType: TextInputType.number,
         type: AvailableTextFieldInputTypes.date,
         isObscure: false,
         formatter: DateTextFormatter(minYear: 1, maxYear: DateTime.now().year),
@@ -131,6 +127,7 @@ final class DateTextFieldState extends BaseTextFieldState {
 
   @override
   DateTextFieldConfiguration get configuration => super.configuration as DateTextFieldConfiguration;
+
 
   @override
   bool get isValid {
