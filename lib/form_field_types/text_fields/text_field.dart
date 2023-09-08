@@ -72,6 +72,7 @@ final class TextFieldState extends BaseTextFieldState {
     super.initialValue,
     TextFieldConfiguration configuration = TextFieldConfiguration.factory,
     super.isRequired,
+    super.enabled,
   }) : super(configuration: configuration);
 
   factory TextFieldState.number({
@@ -79,10 +80,12 @@ final class TextFieldState extends BaseTextFieldState {
     String? initialValue,
     TextFieldConfiguration configuration = TextFieldConfiguration.factory,
     bool? isRequired,
+    bool? enabled,
   }) => TextFieldState(
       key: key,
       initialValue: initialValue,
       isRequired: isRequired,
+      enabled: enabled,
       configuration: TextFieldConfiguration.number(
         label: configuration.label,
         flex: configuration.flex,
@@ -97,8 +100,10 @@ final class TextFieldState extends BaseTextFieldState {
     String? initialValue,
     TextFieldConfiguration configuration = TextFieldConfiguration.factory,
     bool? isRequired,
+    bool? enabled,
   }) => TextFieldState(
       key: key,
+      enabled: enabled,
       initialValue: initialValue,
       isRequired: isRequired,
       configuration: TextFieldConfiguration.decimal(
@@ -115,6 +120,7 @@ final class TextFieldState extends BaseTextFieldState {
        key: json[DynamicFormFieldState.KEY_KEY],
        initialValue: json[DynamicFormFieldState.KEY_INITIAL_VALUE],
        isRequired: json[DynamicFormFieldState.KEY_REQUIRED] ?? true,
+       enabled: json[DynamicFormFieldState.KEY_ENABLED],
        configuration: TextFieldConfiguration.fromJSON(json),
    );
 

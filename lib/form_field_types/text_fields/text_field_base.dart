@@ -98,6 +98,7 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
     super.isRequired,
     required BaseTextFormFieldConfiguration configuration,
     bool hidden = false,
+    super.enabled,
   }) : _hidden = hidden, super(configuration: configuration);
 
 

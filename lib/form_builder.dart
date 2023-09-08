@@ -110,13 +110,14 @@ class _DynamicFormState extends State<DynamicForm> {
 
   Widget _buildRow(List<DynamicFormFieldState> fields) => SeparatedRow(
     data: fields,
+    separatorBuilder: (_,i) => SizedBox(width: widget.runningSpacing),
     itemBuilder: (_,i) => Builder(
         //key: UniqueKey(),
         builder: (context) {
 
         var state = fields[i];
         return Expanded(
-          flex: state.configuration.flex,
+          flex: state.configuration.flex ?? 1,
           child: AnimatedBuilder(
             animation: state,
             builder: (context, child) {
@@ -144,14 +145,18 @@ class _DynamicFormState extends State<DynamicForm> {
                 case FormFieldType.checkbox:
                   return widget.checkboxFieldBuilder?.call(state as CheckboxFieldState) ?? DefaultCheckboxFieldBuilder(state: state as CheckboxFieldState);
                 case FormFieldType.dropdownMenu:
-                  return widget.dropdownFieldBuilder?.call(state as DropdownFieldState) ?? DefaultDropdownFieldBuilder(state: state as DropdownFieldState);
+                  return Builder(
+                    key: UniqueKey(),
+                    builder: (context) {
+                      return widget.dropdownFieldBuilder?.call(state as DropdownFieldState) ?? DefaultDropdownFieldBuilder(state: state as DropdownFieldState);
+                    }
+                  );
               }
             }
           ),
         );
       }
     ),
-    separatorBuilder: (_,i) => SizedBox(width: widget.runningSpacing),
   );
 
   /// Build for every [FormModel] subform in the parent [FormModel] form controller
@@ -168,11 +173,16 @@ class _DynamicFormState extends State<DynamicForm> {
         //SizedBox(height: widget.verticalSpacing),
 
         SeparatedColumn(
-          data: subform.fields,
-          itemBuilder: (_,i) => _buildRow(subform.fields[i]),
+          data: subform.fieldsMatrix,
+          itemBuilder: (_,i) => _buildRow(subform.fieldsMatrix[i]),
           separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
         ),
 
+        SeparatedColumn(
+          data: subform.subforms ?? [],
+          itemBuilder: (_,i) => _buildSubform(subform.subforms![i]),
+          separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
+        ),
 
       ],
     );
@@ -189,8 +199,8 @@ class _DynamicFormState extends State<DynamicForm> {
           widget.formHeader?.call(form) ?? _DefaultFormHeaderBuilder(form: form),
 
         SeparatedColumn(
-          data: form.fields,
-          itemBuilder: (_,i) => _buildRow(form.fields[i]),
+          data: form.fieldsMatrix,
+          itemBuilder: (_,i) => _buildRow(form.fieldsMatrix[i]),
           separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
         ),
 

@@ -40,13 +40,16 @@ final class EmailFieldState extends BaseTextFieldState {
     super.initialValue,
     super.configuration = EmailFieldConfiguration.factory,
     super.isRequired,
+    super.enabled,
+
   }) : super();
 
   factory EmailFieldState.fromJSON(Map<String, dynamic> json) => EmailFieldState(
       key: json[DynamicFormFieldState.KEY_KEY],
       initialValue: json[DynamicFormFieldState.KEY_INITIAL_VALUE],
       isRequired: json[DynamicFormFieldState.KEY_REQUIRED],
-      configuration: EmailFieldConfiguration.fromJSON(json)
+      configuration: EmailFieldConfiguration.fromJSON(json),
+      enabled: json[DynamicFormFieldState.KEY_ENABLED]
   );
 
 

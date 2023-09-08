@@ -1,5 +1,4 @@
 
-
 import 'package:dynamic_forms/field_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'utils.dart';
@@ -19,12 +18,23 @@ class FormModel {
   final String? title;
   final String? desc;
   final List<List<DynamicFormFieldState>> _fields;
-  final List<FormModel>? subforms;
+  late final List<FormModel>? subforms;
 
-  List<List<DynamicFormFieldState>> get fields => _fields;
+  List<List<DynamicFormFieldState>> get fieldsMatrix => _fields;
+
+  /// Return the fields in the main form only (Not the fields from the subform)
+  List<DynamicFormFieldState> get expandedMainFields => _fields.expand((e) => e).toList();
+
+  List<DynamicFormFieldState> get allFields {
+    final List<DynamicFormFieldState> data = List.from(expandedMainFields);
+    for (final FormModel subform in (subforms ?? [])) {
+      data.addAll(subform.allFields);
+    }
+    return data;
+  }
 
   FormModel._({
-    this.key,
+    required this.key,
     this.title,
     this.desc,
     this.subforms,
@@ -32,27 +42,39 @@ class FormModel {
   }) : _fields = fields {
     var duplicates = _fields.expand((element) => element).map((e) => e.key).toList().getDuplicates();
     assert(duplicates.isEmpty, "As chaves $duplicates estão repetidas ao menos uma vez");
-    
-    assert(key == null || (subforms?.every((e) => e.key != null) ?? true), "The parent form key must be null while all subforms keys must be defined");
+    assert(key == null || (subforms?.every((e) => e.key != null) ?? true),
+    "The parent form key must be null while all subforms keys must be defined");
   }
 
   FormModel({
-    String? key,
+    required String? key,
     String? title,
     String? desc,
     List<FormModel>? subforms,
     required List<List<DynamicFormFieldState>> fields,
-  }) : this._(fields: fields, title: title, desc: desc, subforms: subforms, key: key);
+  }) : this._(
+      key: key,
+      fields: fields,
+      title: title,
+      desc: desc,
+      subforms: subforms,
+  );
 
   FormModel.singleField({
-    this.title,
-    this.desc,
+    String? title,
+    String? desc,
     required DynamicFormFieldState field,
-  }) : _fields = [[field]], key = field.key, subforms = null;
+  }) : this._(
+    key: field.key,
+    fields: [[field]],
+    title: title,
+    desc: desc,
+    subforms: null,
+  );
 
 
   FormModel.vertical({
-    String? key,
+    required String? key,
     String? title,
     String? desc,
     List<FormModel>? subforms,
@@ -65,12 +87,14 @@ class FormModel {
   );
 
   FormModel copyWith({
+    String? key,
     String? title,
     String? desc,
     List<FormModel>? subforms,
     List<List<DynamicFormFieldState>>? fields,
   }) => FormModel(
-      fields: fields ?? this.fields,
+      key: key ?? this.key,
+      fields: fields ?? this.fieldsMatrix,
       title: title ?? this.title,
       desc: desc ?? this.desc,
       subforms: subforms ?? this.subforms,
@@ -82,45 +106,51 @@ class FormModel {
     var mappedFields = fieldsAsMaps.map((rows) => rows.map((column) => DynamicFormFieldState.fromJSON(column)).toList()).toList();
 
     return FormModel(
+        key: data[FORM_KEY],
         title: data[FORM_TITLE_KEY],
         desc: data[FORM_DESC_KEY],
         fields: mappedFields,
     );
   }
 
-  /// Maps a form into a JSON structure
+  /// Maps the form inputs as JSON structure
   Map<String, dynamic> toJSON() {
-    Iterable<MapEntry<String, dynamic>> fieldsEntries = fields.expand((element) => element).map((e) => e.asJsonEntry());
-    Iterable<MapEntry<String, dynamic>> childrenEntries = (subforms ?? []).map((e) => MapEntry(e.key!, e.toJSON())).toList();
+    var data = Map.fromEntries(expandedMainFields.map((e) => MapEntry(e.key, e.value)));
+    for (FormModel subform in subforms ?? []) {
+      var fields = subform.expandedMainFields;
 
-    return {
-      ...Map.fromEntries(fieldsEntries),
-      ...Map.fromEntries(childrenEntries),
+      // Reduce single fields where the json structure looks like
+      // [fieldKey: {fieldKey: fieldValue}] to [fieldKey: fieldValue]
+      var isSingleField = fields.length == 1 && fields[0].key == subform.key;
 
-    };
+      data[subform.key!] = isSingleField
+          ? fields[0].value
+          : subform.toJSON();
+    }
+    return data;
   }
 
   DynamicFormFieldState<T> findByKey<T>(String key) {
 
     try {
-      return fields.expand((element) => element).singleWhere((element) => element.key == key) as DynamicFormFieldState<T>;
+      return fieldsMatrix.expand((element) => element).singleWhere((element) => element.key == key) as DynamicFormFieldState<T>;
     } catch (_) {
       throw Exception("There is no $key value on the current controller");
     }
 
   }
 
-
 }
 
 abstract interface class FormController {
 
-  List<List<DynamicFormFieldState>> get fields;
+  List<DynamicFormFieldState> get fields;
   List<DynamicFormFieldState> get requiredFields;
   List<DynamicFormFieldState> get optionalFields;
 
   bool validate({bool validateInBatch = true});
 
+  void clearErrors();
   Map<String, dynamic> toJSON();
 }
 
@@ -135,24 +165,13 @@ class SingleFormController implements FormController {
   }
 
   @override
-  List<List<DynamicFormFieldState>> get fields => form.fields;
+  List<DynamicFormFieldState> get fields => form.allFields;
 
   @override
-  List<DynamicFormFieldState> get requiredFields =>  fields.expand((element) => element).where((element) => element.isRequired).toList();
+  List<DynamicFormFieldState> get requiredFields =>  fields.where((element) => element.isRequired).toList();
 
   @override
-  List<DynamicFormFieldState> get optionalFields =>  fields.expand((element) => element).where((element) => !element.isRequired).toList();
-
-  // Todo allow deep tree search
-  DynamicFormFieldState findByKey(String key) {
-
-    try {
-      return fields.expand((element) => element).singleWhere((element) => element.key == key);
-    } catch (_) {
-      throw Exception("There is no $key value on the current controller");
-    }
-
-  }
+  List<DynamicFormFieldState> get optionalFields =>  fields.where((element) => !element.isRequired).toList();
 
   @override
   bool validate({bool validateInBatch = true}) {
@@ -169,6 +188,24 @@ class SingleFormController implements FormController {
     bool requiredAreReady = requiredFields.every((element) => element.isValid);
     bool optionalFieldsAreReady = optionalFields.where((element) => element.value != null).every((element) => element.isValid);
     return requiredAreReady && optionalFieldsAreReady;
+  }
+
+  @override
+  void clearErrors() {
+    for (var e in fields) {
+      e.error = null;
+    }
+  }
+
+  // Todo allow deep tree search
+  DynamicFormFieldState findByKey(String key) {
+
+    try {
+      return fields.singleWhere((element) => element.key == key);
+    } catch (_) {
+      throw Exception("There is no $key value on the current controller");
+    }
+
   }
 
   void addListenersByKey(Map<String,void Function(DynamicFormFieldState)> listenersMap) {
@@ -179,10 +216,7 @@ class SingleFormController implements FormController {
   }
 
   @override
-  Map<String, dynamic> toJSON() {
-    // TODO: implement toJSON
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJSON() => form.toJSON();
 
 }
 
@@ -190,19 +224,20 @@ class MultipleFormController extends ChangeNotifier implements FormController {
 
   MultipleFormController({
       required List<FormModel> forms,
-  }) : _forms = forms, assert(forms.every((element) => element.key != null) && forms.map((e) => e.key!).toList().getDuplicates().isEmpty);
+  }) : _forms = forms, assert(forms.every((element) => element.key != null && element.key!.isNotEmpty)
+      && forms.map((e) => e.key!).toList().getDuplicates().isEmpty, "There is some duplicated form keys");
 
   final List<FormModel> _forms;
   List<FormModel> get forms => _forms;
 
   @override
-  List<List<DynamicFormFieldState>> get fields => forms.expand((form) => form.fields).toList();
+  List<DynamicFormFieldState> get fields => forms.expand((form) => form.allFields).toList();
 
   @override
-  List<DynamicFormFieldState> get requiredFields =>  fields.expand((element) => element).where((element) => element.isRequired).toList();
+  List<DynamicFormFieldState> get requiredFields =>  fields.where((element) => element.isRequired).toList();
 
   @override
-  List<DynamicFormFieldState> get optionalFields =>  fields.expand((element) => element).where((element) => !element.isRequired).toList();
+  List<DynamicFormFieldState> get optionalFields =>  fields.where((element) => !element.isRequired).toList();
 
   @override
   bool validate({bool validateInBatch = true}) {
@@ -221,7 +256,15 @@ class MultipleFormController extends ChangeNotifier implements FormController {
     return requiredAreReady && optionalFieldsAreReady;
   }
 
+  @override
+  void clearErrors() {
+    for (var e in forms.expand((e) => e.allFields)){
+      e.error = null;
+    }
+  }
+
   FormModel add(FormModel form) {
+    assert(form.key != null && form.key!.isNotEmpty, "Only root forms can have a null key");
     assert(!_forms.map((e) => e.key).contains(form.key), "There is already a form by the key ${form.key}");
     _forms.add(form);
     notifyListeners();
@@ -243,7 +286,7 @@ class MultipleFormController extends ChangeNotifier implements FormController {
   void removeByIndex(int i) {
 
     if (i >= 0 && i < _forms.length) {
-      var e = _forms.removeAt(i);
+      _forms.removeAt(i);
       notifyListeners();
     }
   }
@@ -265,20 +308,6 @@ class MultipleFormController extends ChangeNotifier implements FormController {
     }
   }
 
-  /*
-  void popUntilIndex(int i, {bool inclusive = false}) {
-    if (i >= 0 && i < _forms.length) {
-      final indexToRemove = inclusive ? i : i-1;
-      final endIndex = _forms.length - indexToRemove;
-
-      if (endIndex < _forms.length) {
-        _forms.removeRange(endIndex, _forms.length);
-        notifyListeners();
-      }
-    }
-  }
-   */
-
   FormModel getByKey(String key) {
 
     try {
@@ -286,8 +315,20 @@ class MultipleFormController extends ChangeNotifier implements FormController {
     } catch (_) {
       throw Exception("There is no $key form in this controller");
     }
-
   }
+
+  /*
+  DynamicFormFieldState getFieldByKey(String fieldKey) {
+
+    try {
+      return forms
+          .expand((FormModel parent) => "${parent.key}.${}");
+    } catch (_) {
+      throw Exception("There is no $key form in this controller");
+    }
+  }
+
+   */
 
   @override
   Map<String, dynamic> toJSON() {

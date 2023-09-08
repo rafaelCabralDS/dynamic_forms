@@ -41,14 +41,14 @@ base class FormFieldConfiguration {
   /// If the field is in a row, it is possible to change the width of each
   /// by defining an flex value of the expanded element in the row.
   /// Default is all fields take the same space
-  final int flex;
+  final int? flex;
 
 
   const FormFieldConfiguration( {
     required this.formType,
     this.label,
-    int? flex,
-  }) : flex = flex ?? 1;
+    this.flex,
+  });
 
   factory FormFieldConfiguration.fromJSON(Map<String, dynamic> json) {
     var fieldType = FormFieldType.fromString(json[FormFieldConfiguration.KEY_FIELD_TYPE]);

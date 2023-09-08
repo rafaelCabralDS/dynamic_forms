@@ -1,5 +1,4 @@
 import 'package:dynamic_forms/field_state.dart';
-import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 final class CpfFieldConfiguration extends BaseTextFormFieldConfiguration {
@@ -42,7 +41,7 @@ final class CnpjFieldConfiguration extends BaseTextFormFieldConfiguration {
     super.label = "CNPJ",
     super.flex,
     super.hint = "00.000.000/0000-00",
-    super.suffixIcon
+    super.suffixIcon,
   }) : super(
     type: AvailableTextFieldInputTypes.cnpj,
     isObscure: false,
@@ -76,6 +75,7 @@ final class CpfFieldState extends BaseTextFieldState {
     super.initialValue,
     CpfFieldConfiguration? configuration,
     super.isRequired,
+    super.enabled,
   }) : super(configuration: configuration ?? CpfFieldConfiguration.factory);
 
 
@@ -107,6 +107,7 @@ final class CnpjFieldState extends BaseTextFieldState {
     super.initialValue,
     CnpjFieldConfiguration? configuration,
     super.isRequired,
+    super.enabled,
   }) : super(configuration: configuration ?? CnpjFieldConfiguration.factory);
 
   factory CnpjFieldState.fromJSON(Map<String, dynamic> json) => CnpjFieldState(

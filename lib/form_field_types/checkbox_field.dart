@@ -32,6 +32,7 @@ final class CheckboxFieldState extends DynamicFormFieldState<bool> {
   CheckboxFieldState({
     required super.key,
     super.initialValue = false,
+    super.enabled,
    CheckboxFieldConfiguration configuration = CheckboxFieldConfiguration.factory,
     super.isRequired,
   }) : super(configuration: configuration);

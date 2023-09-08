@@ -9,21 +9,21 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('DateTimeParsing extension', () {
     test('Parsing "day/month/year" format', () {
-      final date1 = '5/9/2023';
+      const date1 = '5/9/2023';
       final dateTime1 = date1.parseAsBrDate();
 
       expect(dateTime1, equals(DateTime(2023, 9, 5)));
     });
 
     test('Parsing "day-month-year" format', () {
-      final date2 = '1-2-2023';
+      const date2 = '1-2-2023';
       final dateTime2 = date2.parseAsBrDate();
 
       expect(dateTime2, equals(DateTime(2023, 2, 1)));
     });
 
     test('Parsing "day/month/year" format but sparced', () {
-      final date1 = '  5/ 9/  2023';
+      const date1 = '  5/ 9/  2023';
       final dateTime1 = date1.parseAsBrDate();
 
       expect(dateTime1, equals(DateTime(2023, 9, 5)));
@@ -31,7 +31,7 @@ void main() {
 
 
     test('Invalid date format should throw FormatException', () {
-      final invalidDate = 'invalid-date';
+      const invalidDate = 'invalid-date';
 
       expect(() => invalidDate.parseAsBrDate(), throwsFormatException);
     });
@@ -45,9 +45,9 @@ void main() {
     });
 
     test('Formatting and restricting date', () {
-      final date1 = '32/13/2023'; // Invalid day and month
-      final date2 = '31/12/2023'; // Valid date
-      final date3 = '01/01/2101'; // Year out of range
+      const date1 = '32/13/2023'; // Invalid day and month
+      const date2 = '31/12/2023'; // Valid date
+      const date3 = '01/01/2101'; // Year out of range
 
       // Apply formatter to the input strings
       final formattedDate1 = formatter.formatEditUpdate(

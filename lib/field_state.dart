@@ -10,14 +10,17 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
   static const String KEY_REQUIRED = "required";
   static const String KEY_KEY = "key";
   static const String KEY_INITIAL_VALUE = "default_value";
+  static const String KEY_ENABLED = "enabled";
 
   DynamicFormFieldState({
     required this.key,
     required this.configuration,
     T? initialValue,
     bool? isRequired,
+    bool? enabled,
   }) :
         _error = null,
+        _enabled = enabled ?? true,
         _value = initialValue,
         isRequired = isRequired ?? true;
 
@@ -29,20 +32,29 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
 
   T? _value;
   String? _error;
+  bool _enabled;
 
   T? get value => _value;
   String? get error => _error;
+  bool get enabled => _enabled;
 
   bool get hasError => _error != null && _error!.isNotEmpty;
- // bool get enabled => _dependencies.every((element) => element.isValid());
 
   set value(T? value) {
+    if (value == _value) return;
     _value = value;
     notifyListeners();
   }
 
   set error(String? value) {
+    if (value == _error) return;
     _error = value;
+    notifyListeners();
+  }
+
+  set enabled(bool value) {
+    if (value == _enabled) return;
+    _enabled = value;
     notifyListeners();
   }
 
@@ -89,7 +101,7 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
     switch (fieldType) {
       case FormFieldType.textField: return BaseTextFieldState.fromJSON(json) as DynamicFormFieldState<T>;
       case FormFieldType.checkbox: return CheckboxFieldState.fromJSON(json) as DynamicFormFieldState<T>;
-      case FormFieldType.switcher: throw UnimplementedError();
+      case FormFieldType.switcher: throw SwitcherFieldState.fromJSON(json) as DynamicFormFieldState<T>;
       case FormFieldType.dropdownMenu: return DropdownFieldState.fromJSON(json) as DynamicFormFieldState<T>;
     }
 

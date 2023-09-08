@@ -37,15 +37,25 @@ final class DropdownFieldState<T extends Object> extends DynamicFormFieldState<T
 
   static const String KEY_OPTIONS = "options";
 
-  final List<T> options;
+  final List<T> _options;
 
   DropdownFieldState({
     required super.key,
-    required this.options,
+    required List<T> options,
     super.initialValue,
+    super.enabled,
     DropdownFieldConfiguration configuration =  DropdownFieldConfiguration.factory,
     super.isRequired,
-  }) : super(configuration: configuration);
+  }) : _options = options, super(configuration: configuration);
+
+  List<T> get options => _options;
+  set options(List<T> options) {
+    if (({...options}.difference({...this.options}).isNotEmpty)) {
+      value = null;
+      _options..clear()..addAll(options);
+      notifyListeners();
+    }
+  }
 
 
   @override
@@ -81,9 +91,11 @@ class DefaultDropdownFieldBuilder<T extends Object> extends StatelessWidget {
 
 
     return DropdownMenu(
+        //key: UniqueKey(),
         onSelected: (value) => state.value = value,
         hintText: state.configuration.hint,
         initialSelection: state.value,
+        enabled: state.enabled,
         dropdownMenuEntries: state.options
             .map((e) => entryBuilder?.call(e) ?? DropdownMenuEntry(value: e, label: state.configuration.customLabel?.call(e) ?? e.toString()))
             .toList()
