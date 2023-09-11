@@ -55,15 +55,9 @@ final class EmailFieldState extends BaseTextFieldState {
 
   /// A normal text field is always valid
   @override
-  bool get isValid {
-
-    if (value == null) return false;
-    if (!RegExp(_pattern as String).hasMatch(value!)) {
-      return false;
-    } else {
-      return true;
-    }
-
+  bool validator(String? v) {
+    if (v == null) return false;
+    return RegExp(_pattern as String).hasMatch(v);
   }
 
   @override

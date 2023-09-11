@@ -148,7 +148,6 @@ class DefaultTextFieldBuilder extends StatefulWidget {
   const DefaultTextFieldBuilder({
     super.key,
     required this.state,
-
   });
 
   final BaseTextFieldState state;
@@ -161,11 +160,20 @@ class _DefaultTextFieldBuilderState extends State<DefaultTextFieldBuilder> {
 
   late final TextEditingController _editingController;
 
+
   @override
   void initState() {
     _editingController = TextEditingController(text: widget.state.value);
+
+    widget.state.listenItself((stateValue) {
+      if (stateValue != _editingController.text) {
+        _editingController.text = stateValue ?? "";
+      }
+    });
+
     super.initState();
   }
+
 
   @override
   void dispose() {
@@ -183,7 +191,7 @@ class _DefaultTextFieldBuilderState extends State<DefaultTextFieldBuilder> {
         onChanged: (v) => widget.state.value = v,
         obscureText: widget.state.hidden,
         inputFormatters: widget.state.configuration.formatter != null ? [widget.state.configuration.formatter!] : null,
-        //enabled: ,
+        enabled: widget.state.enabled,
         decoration: InputDecoration(
             labelText: widget.state.configuration.label ?? widget.state.key,
             errorText: widget.state.error,

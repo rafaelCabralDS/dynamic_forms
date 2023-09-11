@@ -91,10 +91,12 @@ final class CpfFieldState extends BaseTextFieldState {
   @override
   CpfFieldConfiguration get configuration => super.configuration as CpfFieldConfiguration;
 
-  /// A normal text field is always valid
+
   @override
-  bool get isValid {
-    return configuration.formatter.getUnmaskedText().length == 11;
+  bool validator(String? v) {
+    if (v == null) return false;
+    const cpfRegex = r'^\d{3}\.\d{3}\.\d{3}\-\d{2}$';
+    return RegExp(cpfRegex).hasMatch(v);
   }
 
 }
@@ -121,10 +123,11 @@ final class CnpjFieldState extends BaseTextFieldState {
   CnpjFieldConfiguration get configuration => super.configuration as CnpjFieldConfiguration;
 
 
-  /// A normal text field is always valid
   @override
-  bool get isValid {
-    return configuration.formatter.getUnmaskedText().length == 14;
+  bool validator(String? v) {
+    if (v == null) return false;
+    const cnpjRegex = r'^\d{2}\.\d{3}\.\d{3}/\d{4}\-\d{2}$';
+    return RegExp(cnpjRegex).hasMatch(v);
   }
 
 }

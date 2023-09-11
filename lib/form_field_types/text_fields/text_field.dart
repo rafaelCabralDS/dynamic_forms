@@ -73,7 +73,9 @@ final class TextFieldState extends BaseTextFieldState {
     TextFieldConfiguration configuration = TextFieldConfiguration.factory,
     super.isRequired,
     super.enabled,
-  }) : super(configuration: configuration);
+  }) : super(
+      configuration: configuration
+  );
 
   factory TextFieldState.number({
     required String key,
@@ -126,11 +128,10 @@ final class TextFieldState extends BaseTextFieldState {
 
 
   @override
-  bool get isValid => value != null && value!.isNotEmpty;
+  bool validator(String? v) => v != null && v.isNotEmpty;
 
   @override
   bool validate([String invalidMsg = "Campo inválido"]) {
-
     return isValid;
   }
 

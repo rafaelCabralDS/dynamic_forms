@@ -54,17 +54,10 @@ final class PasswordFieldState extends BaseTextFieldState {
 
 
   @override
-  bool get isValid {
-
-    if (value == null || value!.isEmpty || value!.length < 6) {
-      return false;
-    }
+  bool validator(String? v) {
+    if (v == null || v.isEmpty || v.length < 6) return false;
     const Pattern pattern = r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$";
-    if (!RegExp(pattern as String).hasMatch(value!)) {
-      return false;
-    }
-
-    return true;
+    return RegExp(pattern as String).hasMatch(v);
   }
 
   @override

@@ -28,7 +28,6 @@ final class CheckboxFieldConfiguration extends FormFieldConfiguration {
 
 final class CheckboxFieldState extends DynamicFormFieldState<bool> {
 
-
   CheckboxFieldState({
     required super.key,
     super.initialValue = false,
@@ -41,7 +40,13 @@ final class CheckboxFieldState extends DynamicFormFieldState<bool> {
   bool get value => super.value!;
 
   @override
-  bool get isValid => value;
+  void reset() {
+    if (value == false) return;
+    value = false;
+  }
+
+  @override
+  bool validator(bool? v) => v == true;
 
   @override
   CheckboxFieldConfiguration get configuration => super.configuration as CheckboxFieldConfiguration;

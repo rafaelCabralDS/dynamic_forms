@@ -58,8 +58,10 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool validator(T? v);
+
   /// Only returns if the field is valid or not, it does not change the state to error if it is not
-  bool get isValid;
+  bool get isValid => validator(value);
 
   /// A method to override if you want to auto update the error state if the field is not valid
   bool validate([String invalidMsg = "Campo inválido"]) {
@@ -84,6 +86,14 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
     });
   }
 
+  /// If the [autoFillValue] is valid, the current field state value will be updated
+  void autofill(T? autoFillValue) {
+    if (_value != autoFillValue && validator(autoFillValue)) {
+      if (validator(autoFillValue)) {
+        value = autoFillValue;
+      }
+    }
+  }
 
 
   MapEntry<String, T?> asJsonEntry() => MapEntry(key, value);
@@ -104,8 +114,6 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
       case FormFieldType.switcher: throw SwitcherFieldState.fromJSON(json) as DynamicFormFieldState<T>;
       case FormFieldType.dropdownMenu: return DropdownFieldState.fromJSON(json) as DynamicFormFieldState<T>;
     }
-
-
   }
 
 }

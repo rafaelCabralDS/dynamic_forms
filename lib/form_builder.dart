@@ -20,6 +20,7 @@ typedef DateTextFormFieldBuilder = Widget Function(DateTextFieldState field);
 
 typedef CheckboxFormFieldBuilder = Widget Function(CheckboxFieldState field);
 typedef DropdownFormFieldBuilder<T extends Object> = Widget Function(DropdownFieldState<T> field);
+typedef SwitcherFormFieldBuilder = Widget Function(SwitcherFieldState field);
 
 class DynamicForm extends StatefulWidget {
 
@@ -37,6 +38,7 @@ class DynamicForm extends StatefulWidget {
   final CheckboxFormFieldBuilder? checkboxFieldBuilder;
   final DropdownFormFieldBuilder? dropdownFieldBuilder;
   final DateTextFormFieldBuilder? dateTextFormFieldBuilder;
+  final SwitcherFormFieldBuilder? switcherFormFieldBuilder;
 
   /// A map that overrides the default fields builders for specific field
   /// by the key value
@@ -66,6 +68,7 @@ class DynamicForm extends StatefulWidget {
     this.dropdownFieldBuilder,
     this.dateTextFormFieldBuilder,
     this.subformHeader,
+    this.switcherFormFieldBuilder,
   });
 
   @override
@@ -108,11 +111,11 @@ class _DynamicFormState extends State<DynamicForm> {
   }
 
 
+
   Widget _buildRow(List<DynamicFormFieldState> fields) => SeparatedRow(
     data: fields,
     separatorBuilder: (_,i) => SizedBox(width: widget.runningSpacing),
     itemBuilder: (_,i) => Builder(
-        //key: UniqueKey(),
         builder: (context) {
 
         var state = fields[i];
@@ -139,12 +142,13 @@ class _DynamicFormState extends State<DynamicForm> {
                     case AvailableTextFieldInputTypes.date: return _buildDateField(state as DateTextFieldState);
                   }
 
-                case FormFieldType.switcher: throw UnimplementedError();
+                case FormFieldType.switcher:
+                  return widget.switcherFormFieldBuilder?.call(state as SwitcherFieldState) ?? DefaultSwitcherFieldBuilder(state: state as SwitcherFieldState);
                 case FormFieldType.checkbox:
                   return widget.checkboxFieldBuilder?.call(state as CheckboxFieldState) ?? DefaultCheckboxFieldBuilder(state: state as CheckboxFieldState);
                 case FormFieldType.dropdownMenu:
                   return Builder(
-                      key: UniqueKey(),
+                      //key: UniqueKey(),
                       builder: (context) {
                         return widget.dropdownFieldBuilder?.call(state as DropdownFieldState) ?? DefaultDropdownFieldBuilder(state: state as DropdownFieldState);
                       }

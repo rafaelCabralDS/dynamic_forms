@@ -1,4 +1,5 @@
 
+
 import 'package:dynamic_forms/field_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'utils.dart';
@@ -17,7 +18,7 @@ class FormModel {
 
   final String? title;
   final String? desc;
-  final List<List<DynamicFormFieldState>> _fields;
+  late final List<List<DynamicFormFieldState>> _fields;
   late final List<FormModel>? subforms;
 
   List<List<DynamicFormFieldState>> get fieldsMatrix => _fields;
@@ -94,7 +95,7 @@ class FormModel {
     List<List<DynamicFormFieldState>>? fields,
   }) => FormModel(
       key: key ?? this.key,
-      fields: fields ?? this.fieldsMatrix,
+      fields: fields ?? fieldsMatrix,
       title: title ?? this.title,
       desc: desc ?? this.desc,
       subforms: subforms ?? this.subforms,
@@ -115,7 +116,9 @@ class FormModel {
 
   /// Maps the form inputs as JSON structure
   Map<String, dynamic> toJSON() {
-    var data = Map.fromEntries(expandedMainFields.map((e) => MapEntry(e.key, e.value)));
+    var data = Map.fromEntries(expandedMainFields.map((e) => MapEntry(e.key, e.value)))
+      ..removeWhere((key, value) => key.startsWith("_")); // ignore internal fields
+
     for (FormModel subform in subforms ?? []) {
       var fields = subform.expandedMainFields;
 
@@ -133,12 +136,42 @@ class FormModel {
   DynamicFormFieldState<T> findByKey<T>(String key) {
 
     try {
-      return fieldsMatrix.expand((element) => element).singleWhere((element) => element.key == key) as DynamicFormFieldState<T>;
+      return _findByKey(this, key);
     } catch (_) {
       throw Exception("There is no $key value on the current controller");
     }
-
   }
+
+  /// Internal implementation for the [findByKey] method
+  DynamicFormFieldState<T> _findByKey<T>(FormModel root, String key) {
+
+    var keyTree = key.split(".");
+
+    if (keyTree.length == 1) {
+      return root.expandedMainFields.singleWhere((element) => element.key == key) as DynamicFormFieldState<T>;
+    }
+    var subform = subforms!.singleWhere((element) => element.key == keyTree[0]);
+    return _findByKey(subform, keyTree.sublist(1).join("."));
+  }
+
+
+  void autofill(Map<String, dynamic> json) {
+
+    for (final entry in json.entries.where((element) => element.value != null)) {
+      try {
+        var field = findByKey(entry.key);
+        field.autofill(entry.value);
+      } catch (_) {} // there is no field to fill
+    }
+  }
+
+  void clear() {
+    for (var field in allFields) {
+      field.reset();
+    }
+  }
+
+
 
 }
 

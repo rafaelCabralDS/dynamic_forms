@@ -117,7 +117,7 @@ final class DateTextFieldState extends BaseTextFieldState {
   }) : super(
 
       initialValue: initialValue != null ? "${initialValue.day}${initialValue.month}/${initialValue.year}" : null,
-      configuration: configuration ?? PhoneFieldConfiguration.factory);
+      configuration: configuration ?? DateTextFieldConfiguration.any());
 
   factory DateTextFieldState.fromJSON(Map<String, dynamic> json) => DateTextFieldState(
       key: json[DynamicFormFieldState.KEY_KEY],
@@ -131,11 +131,14 @@ final class DateTextFieldState extends BaseTextFieldState {
 
 
   @override
-  bool get isValid {
-
-    if (value?.length != 8) return false;
-
-    var date = value!.parseAsBrDate();
+  bool validator(String? v) {
+    if (v == null) return false;
+    DateTime date;
+    try {
+      date = v.parseAsBrDate();
+    } catch (e) {
+      return false;
+    }
 
     if (date.isAfter(configuration.maxDate) || date.isBefore(configuration.minDate)) return false;
     return true;

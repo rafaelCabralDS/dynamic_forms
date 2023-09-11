@@ -7,8 +7,7 @@ final class SwitcherFieldState extends DynamicFormFieldState<bool> {
     required super.key,
     super.initialValue = false,
     super.enabled,
-    SwitcherFieldConfiguration configuration =
-        SwitcherFieldConfiguration.factory,
+    SwitcherFieldConfiguration configuration = SwitcherFieldConfiguration.factory,
     super.isRequired,
   }) : super(configuration: configuration);
 
@@ -16,11 +15,16 @@ final class SwitcherFieldState extends DynamicFormFieldState<bool> {
   bool get value => super.value!;
 
   @override
-  bool get isValid => value;
+  void reset() {
+    if (value == false) return;
+    value = false;
+  }
 
   @override
-  SwitcherFieldConfiguration get configuration =>
-      super.configuration as SwitcherFieldConfiguration;
+  bool validator(bool? v) => v == true;
+
+  @override
+  SwitcherFieldConfiguration get configuration => super.configuration as SwitcherFieldConfiguration;
 
   factory SwitcherFieldState.fromJSON(Map<String, dynamic> json) =>
       SwitcherFieldState(
@@ -51,3 +55,28 @@ final class SwitcherFieldConfiguration extends FormFieldConfiguration {
         description: TextSpan(text: json[KEY_DESCRIPTION]));
   }
 }
+
+
+class DefaultSwitcherFieldBuilder extends StatelessWidget {
+
+  final SwitcherFieldState state;
+
+  const DefaultSwitcherFieldBuilder({super.key,
+    required this.state,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Switch(
+          value: state.value,
+          onChanged: (v) => state.value = !state.value,
+        ),
+        if (state.configuration.description != null)
+          Text.rich(state.configuration.description!)
+      ],
+    );
+  }
+}
+

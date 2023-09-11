@@ -16,17 +16,17 @@ final class DropdownFieldConfiguration<E extends Object> extends FormFieldConfig
 
   const DropdownFieldConfiguration({
     super.label,
-    //super.flex,
+    super.flex,
     this.hint,
     this.customLabel,
-  }) : super(formType: FormFieldType.dropdownMenu, flex: null);
+  }) : super(formType: FormFieldType.dropdownMenu);
 
   static const DropdownFieldConfiguration factory = DropdownFieldConfiguration();
 
   factory DropdownFieldConfiguration.fromJSON(Map<String, dynamic> json) {
     return DropdownFieldConfiguration(
         label: json[FormFieldConfiguration.KEY_LABEL],
-        //flex: json[FormFieldConfiguration.KEY_FLEX],
+        flex: json[FormFieldConfiguration.KEY_FLEX],
         hint: json[DropdownFieldConfiguration.KEY_HINT]
     );
   }
@@ -61,6 +61,10 @@ final class DropdownFieldState<T extends Object> extends DynamicFormFieldState<T
   @override
   bool get isValid => value != null;
 
+
+  @override
+  bool validator(T? v) => _options.contains(v);
+
   @override
   DropdownFieldConfiguration get configuration => super.configuration as DropdownFieldConfiguration;
 
@@ -75,7 +79,7 @@ final class DropdownFieldState<T extends Object> extends DynamicFormFieldState<T
 
 }
 
-class DefaultDropdownFieldBuilder<T extends Object> extends StatelessWidget {
+class DefaultDropdownFieldBuilder<T extends Object> extends StatefulWidget {
 
   final DropdownFieldState<T> state;
   final DropdownMenuEntry Function(T option)? entryBuilder;
@@ -87,17 +91,50 @@ class DefaultDropdownFieldBuilder<T extends Object> extends StatelessWidget {
   });
 
   @override
+  State<DefaultDropdownFieldBuilder> createState() => _DefaultDropdownFieldBuilderState<T>();
+}
+
+class _DefaultDropdownFieldBuilderState<T extends Object> extends State<DefaultDropdownFieldBuilder<T>> {
+
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    _controller = TextEditingController(text: widget.state.value?.toString());
+    //widget.state.listenItself((stateValue) {});
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
 
-    return DropdownMenu(
-        onSelected: (value) => state.value = value,
-        hintText: state.configuration.hint,
-        initialSelection: state.value,
-        enabled: state.enabled,
-        dropdownMenuEntries: state.options
-            .map((e) => entryBuilder?.call(e) ?? DropdownMenuEntry(value: e, label: state.configuration.customLabel?.call(e) ?? e.toString()))
-            .toList()
+
+    return LayoutBuilder(
+      builder: (context, dimens) {
+
+        return DropdownMenu(
+            controller: _controller,
+            width: dimens.maxWidth,
+            onSelected: (value) => widget.state.value = value,
+            hintText: widget.state.configuration.hint,
+            initialSelection: widget.state.value,
+            enabled: widget.state.enabled,
+            dropdownMenuEntries: widget.state.options
+                .map((e) => widget.entryBuilder?.call(e) ?? DropdownMenuEntry(
+                    value: e,
+                    label: widget.state.configuration.customLabel?.call(e) ?? e.toString(),
+            ))
+                .toList()
+        );
+      }
     );
   }
 }

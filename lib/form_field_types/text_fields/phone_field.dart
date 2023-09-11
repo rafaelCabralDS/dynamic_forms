@@ -20,7 +20,7 @@ final class PhoneFieldConfiguration extends BaseTextFormFieldConfiguration {
   );
 
   @override
-  MaskTextInputFormatter? get formatter => super.formatter as MaskTextInputFormatter;
+  MaskTextInputFormatter get formatter => super.formatter as MaskTextInputFormatter;
 
   static final factory = PhoneFieldConfiguration();
 
@@ -52,10 +52,16 @@ final class PhoneFieldState extends BaseTextFieldState {
       configuration: PhoneFieldConfiguration.fromJSON(json)
   );
 
-
-  /// A normal text field is always valid
   @override
-  bool get isValid => (configuration as PhoneFieldConfiguration).formatter!.getUnmaskedText().length == 11;
+  PhoneFieldConfiguration get configuration => super.configuration as PhoneFieldConfiguration;
+
+
+  @override
+  bool validator(String? v) {
+    if (v == null) return false;
+    const phoneRegex = r'^\(\d{2}\)\s?\d{5}\s?\-\s?\d{4}$';
+    return RegExp(phoneRegex).hasMatch(v);
+  }
 
 
 }
