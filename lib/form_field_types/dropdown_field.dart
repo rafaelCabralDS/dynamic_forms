@@ -16,17 +16,17 @@ final class DropdownFieldConfiguration<E extends Object> extends FormFieldConfig
 
   const DropdownFieldConfiguration({
     super.label,
-    super.flex,
+    //super.flex,
     this.hint,
     this.customLabel,
-  }) : super(formType: FormFieldType.dropdownMenu);
+  }) : super(formType: FormFieldType.dropdownMenu, flex: null);
 
   static const DropdownFieldConfiguration factory = DropdownFieldConfiguration();
 
   factory DropdownFieldConfiguration.fromJSON(Map<String, dynamic> json) {
     return DropdownFieldConfiguration(
         label: json[FormFieldConfiguration.KEY_LABEL],
-        flex: json[FormFieldConfiguration.KEY_FLEX],
+        //flex: json[FormFieldConfiguration.KEY_FLEX],
         hint: json[DropdownFieldConfiguration.KEY_HINT]
     );
   }
@@ -91,7 +91,6 @@ class DefaultDropdownFieldBuilder<T extends Object> extends StatelessWidget {
 
 
     return DropdownMenu(
-        //key: UniqueKey(),
         onSelected: (value) => state.value = value,
         hintText: state.configuration.hint,
         initialSelection: state.value,

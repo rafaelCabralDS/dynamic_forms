@@ -116,9 +116,7 @@ class _DynamicFormState extends State<DynamicForm> {
         builder: (context) {
 
         var state = fields[i];
-        return Expanded(
-          flex: state.configuration.flex ?? 1,
-          child: AnimatedBuilder(
+        var field = AnimatedBuilder(
             animation: state,
             builder: (context, child) {
 
@@ -146,15 +144,25 @@ class _DynamicFormState extends State<DynamicForm> {
                   return widget.checkboxFieldBuilder?.call(state as CheckboxFieldState) ?? DefaultCheckboxFieldBuilder(state: state as CheckboxFieldState);
                 case FormFieldType.dropdownMenu:
                   return Builder(
-                    key: UniqueKey(),
-                    builder: (context) {
-                      return widget.dropdownFieldBuilder?.call(state as DropdownFieldState) ?? DefaultDropdownFieldBuilder(state: state as DropdownFieldState);
-                    }
+                      key: UniqueKey(),
+                      builder: (context) {
+                        return widget.dropdownFieldBuilder?.call(state as DropdownFieldState) ?? DefaultDropdownFieldBuilder(state: state as DropdownFieldState);
+                      }
                   );
               }
             }
-          ),
         );
+
+        if (state.configuration.flex != null) {
+          return Expanded(
+              flex: state.configuration.flex!,
+              child: field
+          );
+        }else{
+          return Flexible(child: field);
+        }
+
+
       }
     ),
   );

@@ -20,6 +20,7 @@ class SeparatedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.max,
       children: List.generate(math.max(0, data.length * 2 - 1), (index) {
         final int itemIndex = index ~/ 2;
         if (index.isEven) {
