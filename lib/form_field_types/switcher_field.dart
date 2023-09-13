@@ -2,8 +2,8 @@ import 'package:dynamic_forms/field_state.dart';
 import 'package:dynamic_forms/form_field_configuration.dart';
 import 'package:flutter/material.dart';
 
-final class SwitcherFieldState extends DynamicFormFieldState<bool> {
-  SwitcherFieldState({
+final class SwitchFieldState extends DynamicFormFieldState<bool> {
+  SwitchFieldState({
     required super.key,
     super.initialValue = false,
     super.enabled,
@@ -26,8 +26,8 @@ final class SwitcherFieldState extends DynamicFormFieldState<bool> {
   @override
   SwitcherFieldConfiguration get configuration => super.configuration as SwitcherFieldConfiguration;
 
-  factory SwitcherFieldState.fromJSON(Map<String, dynamic> json) =>
-      SwitcherFieldState(
+  factory SwitchFieldState.fromJSON(Map<String, dynamic> json) =>
+      SwitchFieldState(
         key: json[DynamicFormFieldState.KEY_KEY],
         initialValue: json[DynamicFormFieldState.KEY_INITIAL_VALUE],
         isRequired: json[DynamicFormFieldState.KEY_REQUIRED] ?? true,
@@ -52,16 +52,17 @@ final class SwitcherFieldConfiguration extends FormFieldConfiguration {
     return SwitcherFieldConfiguration(
         label: json[FormFieldConfiguration.KEY_LABEL],
         flex: json[FormFieldConfiguration.KEY_FLEX],
-        description: TextSpan(text: json[KEY_DESCRIPTION]));
+        description: TextSpan(text: json[KEY_DESCRIPTION])
+    );
   }
 }
 
 
-class DefaultSwitcherFieldBuilder extends StatelessWidget {
+class DefaultSwitchFieldBuilder extends StatelessWidget {
 
-  final SwitcherFieldState state;
+  final SwitchFieldState state;
 
-  const DefaultSwitcherFieldBuilder({super.key,
+  const DefaultSwitchFieldBuilder({super.key,
     required this.state,
   });
 

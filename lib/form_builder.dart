@@ -1,5 +1,7 @@
 import 'package:dynamic_forms/form_controller.dart';
-import 'package:dynamic_forms/form_field_types/text_fields/date_field.dart';
+import 'package:dynamic_forms/form_field_types/expandable_field.dart';
+import 'package:dynamic_forms/form_field_types/file_field.dart';
+import 'package:dynamic_forms/form_model.dart';
 import 'package:dynamic_forms/utils.dart';
 import 'package:flutter/material.dart' hide FormFieldBuilder, FormFieldState;
 import 'field_state.dart';
@@ -20,25 +22,28 @@ typedef DateTextFormFieldBuilder = Widget Function(DateTextFieldState field);
 
 typedef CheckboxFormFieldBuilder = Widget Function(CheckboxFieldState field);
 typedef DropdownFormFieldBuilder<T extends Object> = Widget Function(DropdownFieldState<T> field);
-typedef SwitcherFormFieldBuilder = Widget Function(SwitcherFieldState field);
+typedef SwitcherFormFieldBuilder = Widget Function(SwitchFieldState field);
+typedef FileFormFieldBuilder = Widget Function(FilePickerFieldState field);
+typedef ExpandableFieldBuilder = Widget Function(ExpandableFieldState field);
 
-class DynamicForm extends StatefulWidget {
 
-  final FormController controller;
+
+final class FormFieldStyle {
 
   /// If defined, all non defined specific field builder will fallback
   /// on this builder. Otherwise, they fall into [DefaultTextFieldBuilder]
-  final DefaultTextFormFieldBuilder? defaultTextFormFieldBuilder;
-  final TextFormFieldBuilder? textFieldBuilder;
-  final PasswordFormFieldBuilder? passwordFieldBuilder;
-  final EmailFormFieldBuilder? emailFieldBuilder;
-  final PhoneFormFieldBuilder? phoneFieldBuilder;
-  final CpfFormFieldBuilder? cpfFieldBuilder;
-  final CnpjFormFieldBuilder? cnpjFieldBuilder;
-  final CheckboxFormFieldBuilder? checkboxFieldBuilder;
-  final DropdownFormFieldBuilder? dropdownFieldBuilder;
-  final DateTextFormFieldBuilder? dateTextFormFieldBuilder;
-  final SwitcherFormFieldBuilder? switcherFormFieldBuilder;
+  final DefaultTextFormFieldBuilder baseTextFormFieldBuilder;
+  final TextFormFieldBuilder textFieldBuilder;
+  final PasswordFormFieldBuilder passwordFieldBuilder;
+  final EmailFormFieldBuilder emailFieldBuilder;
+  final PhoneFormFieldBuilder phoneFieldBuilder;
+  final CpfFormFieldBuilder cpfFieldBuilder;
+  final CnpjFormFieldBuilder cnpjFieldBuilder;
+  final CheckboxFormFieldBuilder checkboxFieldBuilder;
+  final DropdownFormFieldBuilder dropdownFieldBuilder;
+  final DateTextFormFieldBuilder dateTextFormFieldBuilder;
+  final SwitcherFormFieldBuilder switchFormFieldBuilder;
+  final FileFormFieldBuilder fileFormFieldBuilder;
 
   /// A map that overrides the default fields builders for specific field
   /// by the key value
@@ -47,209 +52,235 @@ class DynamicForm extends StatefulWidget {
   final double runningSpacing;
   final double verticalSpacing;
 
-  /// How the title and subtitle will be built
-  final FormHeaderBuilder? formHeader;
-  final FormHeaderBuilder? subformHeader;
+  final FormHeaderBuilder formHeaderBuilder;
+  final FormHeaderBuilder subformHeaderBuilder;
 
-  const DynamicForm({super.key,
-    required this.controller,
-    this.defaultTextFormFieldBuilder,
-    this.textFieldBuilder,
-    this.passwordFieldBuilder,
-    this.cnpjFieldBuilder,
-    this.cpfFieldBuilder,
-    this.emailFieldBuilder,
-    this.phoneFieldBuilder,
+  const FormFieldStyle({
+    this.baseTextFormFieldBuilder = defaultTextFormFieldBuilder,
+    TextFormFieldBuilder? textFieldBuilder,
+    CpfFormFieldBuilder? cpfFieldBuilder,
+    CnpjFormFieldBuilder? cnpjFieldBuilder,
+    PhoneFormFieldBuilder? phoneFieldBuilder,
+    EmailFormFieldBuilder? emailFieldBuilder,
+    DateTextFormFieldBuilder? dateTextFormFieldBuilder,
+    this.passwordFieldBuilder = defaultPasswordFormFieldBuilder,
+    this.checkboxFieldBuilder = defaultCheckboxFormFieldBuilder,
+    this.dropdownFieldBuilder = defaultDropdownFormFieldBuilder,
+    this.switchFormFieldBuilder = defaultSwitchFormFieldBuilder,
+    this.fileFormFieldBuilder = defaultFilePickerFormFieldBuilder,
     this.runningSpacing = 10.0,
     this.verticalSpacing = 10.0,
-    this.formHeader,
     this.customFieldsBuilder,
-    this.checkboxFieldBuilder,
-    this.dropdownFieldBuilder,
-    this.dateTextFormFieldBuilder,
-    this.subformHeader,
-    this.switcherFormFieldBuilder,
-  });
+    this.formHeaderBuilder = defaultFormHeaderBuilder,
+    this.subformHeaderBuilder = defaultSubformHeaderBuilder,
+  })  :
+        textFieldBuilder = textFieldBuilder ?? baseTextFormFieldBuilder,
+        cpfFieldBuilder = cpfFieldBuilder ?? baseTextFormFieldBuilder,
+        cnpjFieldBuilder = cnpjFieldBuilder ?? baseTextFormFieldBuilder,
+        emailFieldBuilder = emailFieldBuilder ?? baseTextFormFieldBuilder,
+        phoneFieldBuilder = phoneFieldBuilder ?? baseTextFormFieldBuilder,
+        dateTextFormFieldBuilder = dateTextFormFieldBuilder ?? baseTextFormFieldBuilder;
 
-  @override
-  State<DynamicForm> createState() => _DynamicFormState();
+
+  static Widget defaultTextFormFieldBuilder(BaseTextFieldState state) => DefaultTextFieldBuilder(state: state);
+  static Widget defaultPasswordFormFieldBuilder(PasswordFieldState state) => DefaultPasswordTextFieldBuilder(state: state);
+  static Widget defaultCheckboxFormFieldBuilder(CheckboxFieldState state) => DefaultCheckboxFieldBuilder(state: state);
+  static Widget defaultSwitchFormFieldBuilder(SwitchFieldState state) => DefaultSwitchFieldBuilder(state: state);
+  static Widget defaultDropdownFormFieldBuilder<T extends Object>(DropdownFieldState<T> state) => DefaultDropdownFieldBuilder(state: state);
+  static Widget defaultFilePickerFormFieldBuilder(FilePickerFieldState state) => DefaultFilePickerBuilder(state: state);
+  static Widget defaultFormHeaderBuilder(FormModel form) => _DefaultFormHeaderBuilder(form: form);
+  static Widget defaultSubformHeaderBuilder(FormModel subform) => _DefaultSubFormHeaderBuilder(subform: subform);
 
 }
 
-class _DynamicFormState extends State<DynamicForm> {
+class FieldBuilder extends StatelessWidget {
 
-  Widget _buildDefaultTextField(BaseTextFieldState state) {
-    return widget.defaultTextFormFieldBuilder?.call(state) ?? DefaultTextFieldBuilder(state: state);
-  }
+  final DynamicFormFieldState state;
+  final FormFieldStyle style;
 
-  Widget _buildTextField(TextFieldState state) {
-    return widget.textFieldBuilder?.call(state) ?? _buildDefaultTextField(state);
-  }
+  const FieldBuilder({super.key,
+    required this.state,
+    this.style = const FormFieldStyle()});
 
-  Widget _buildPasswordField(PasswordFieldState state) {
-    return widget.passwordFieldBuilder?.call(state) ?? PasswordDefaultTextFieldBuilder(state: state);
-  }
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+        animation: state,
+        builder: (context, child) {
 
-  Widget _buildCpfField(CpfFieldState state) {
-    return widget.cpfFieldBuilder?.call(state) ?? _buildDefaultTextField(state);
-  }
+          if (style.customFieldsBuilder?.containsKey(state.key) ?? false) {
+            return style.customFieldsBuilder![state.key]!(state);
+          }
 
-  Widget _buildCnpjField(CnpjFieldState state) {
-    return widget.cnpjFieldBuilder?.call(state) ?? _buildDefaultTextField(state);
-  }
+          switch (state.configuration.formType) {
+            case FormFieldType.textField:
 
-  Widget _buildPhoneField(PhoneFieldState state) {
-    return widget.phoneFieldBuilder?.call(state) ?? _buildDefaultTextField(state);
-  }
-
-  Widget _buildEmailField(EmailFieldState state) {
-    return widget.emailFieldBuilder?.call(state) ?? _buildDefaultTextField(state);
-  }
-
-  Widget _buildDateField(DateTextFieldState state) {
-    return widget.dateTextFormFieldBuilder?.call(state) ?? _buildDefaultTextField(state);
-  }
-
-
-
-  Widget _buildRow(List<DynamicFormFieldState> fields) => SeparatedRow(
-    data: fields,
-    separatorBuilder: (_,i) => SizedBox(width: widget.runningSpacing),
-    itemBuilder: (_,i) => Builder(
-        builder: (context) {
-
-        var state = fields[i];
-        var field = AnimatedBuilder(
-            animation: state,
-            builder: (context, child) {
-
-              if (widget.customFieldsBuilder?.containsKey(state.key) ?? false) {
-                return widget.customFieldsBuilder![state.key]!(state);
+              switch ((state as BaseTextFieldState).configuration.type) {
+                case AvailableTextFieldInputTypes.text: return style.textFieldBuilder(state as TextFieldState);
+                case AvailableTextFieldInputTypes.integer: return style.textFieldBuilder(state as TextFieldState);
+                case AvailableTextFieldInputTypes.decimal: return style.textFieldBuilder(state as TextFieldState);
+                case AvailableTextFieldInputTypes.password: return style.passwordFieldBuilder(state as PasswordFieldState);
+                case AvailableTextFieldInputTypes.phone: return style.phoneFieldBuilder(state as PhoneFieldState);
+                case AvailableTextFieldInputTypes.email: return style.emailFieldBuilder(state as EmailFieldState);
+                case AvailableTextFieldInputTypes.cnpj: return style.cnpjFieldBuilder(state as CnpjFieldState);
+                case AvailableTextFieldInputTypes.cpf: return style.cpfFieldBuilder(state as CpfFieldState);
+                case AvailableTextFieldInputTypes.date: return style.dateTextFormFieldBuilder(state as DateTextFieldState);
               }
 
-              switch (state.configuration.formType) {
-                case FormFieldType.textField:
-
-                  switch ((state as BaseTextFieldState).configuration.type) {
-                    case AvailableTextFieldInputTypes.text: return _buildTextField(state as TextFieldState);
-                    case AvailableTextFieldInputTypes.integer: return _buildTextField(state as TextFieldState);
-                    case AvailableTextFieldInputTypes.decimal: return _buildTextField(state as TextFieldState);
-                    case AvailableTextFieldInputTypes.password: return _buildPasswordField(state as PasswordFieldState);
-                    case AvailableTextFieldInputTypes.phone: return _buildPhoneField(state as PhoneFieldState);
-                    case AvailableTextFieldInputTypes.email: return _buildEmailField(state as EmailFieldState);
-                    case AvailableTextFieldInputTypes.cnpj: return _buildCnpjField(state as CnpjFieldState);
-                    case AvailableTextFieldInputTypes.cpf: return _buildCpfField(state as CpfFieldState);
-                    case AvailableTextFieldInputTypes.date: return _buildDateField(state as DateTextFieldState);
-                  }
-
-                case FormFieldType.switcher:
-                  return widget.switcherFormFieldBuilder?.call(state as SwitcherFieldState) ?? DefaultSwitcherFieldBuilder(state: state as SwitcherFieldState);
-                case FormFieldType.checkbox:
-                  return widget.checkboxFieldBuilder?.call(state as CheckboxFieldState) ?? DefaultCheckboxFieldBuilder(state: state as CheckboxFieldState);
-                case FormFieldType.dropdownMenu:
-                  return Builder(
-                      //key: UniqueKey(),
-                      builder: (context) {
-                        return widget.dropdownFieldBuilder?.call(state as DropdownFieldState) ?? DefaultDropdownFieldBuilder(state: state as DropdownFieldState);
-                      }
-                  );
-              }
-            }
-        );
-
-        if (state.configuration.flex != null) {
-          return Expanded(
-              flex: state.configuration.flex!,
-              child: field
-          );
-        }else{
-          return Flexible(child: field);
+            case FormFieldType.switcher:
+              return style.switchFormFieldBuilder.call(state as SwitchFieldState);
+            case FormFieldType.checkbox:
+              return style.checkboxFieldBuilder.call(state as CheckboxFieldState);
+            case FormFieldType.dropdownMenu:
+              return style.dropdownFieldBuilder.call(state as DropdownFieldState);
+            case FormFieldType.file:
+              return style.fileFormFieldBuilder.call(state as FilePickerFieldState);
+            case FormFieldType.expandable:
+              return BuildExpandableFormField(state: state as ExpandableBaseFieldState, style: style);
+          }
         }
-
-
-      }
-    ),
-  );
-
-  /// Build for every [FormModel] subform in the parent [FormModel] form controller
-  Widget _buildSubform(FormModel subform) {
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-
-        SizedBox(height: widget.verticalSpacing),
-
-        widget.subformHeader?.call(subform) ?? _DefaultSubFormHeaderBuilder(subform: subform),
-
-        //SizedBox(height: widget.verticalSpacing),
-
-        SeparatedColumn(
-          data: subform.fieldsMatrix,
-          itemBuilder: (_,i) => _buildRow(subform.fieldsMatrix[i]),
-          separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
-        ),
-
-        SeparatedColumn(
-          data: subform.subforms ?? [],
-          itemBuilder: (_,i) => _buildSubform(subform.subforms![i]),
-          separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
-        ),
-
-      ],
-    );
-
-  }
-
-  /// Build only once per controller
-  Widget _buildForm(FormModel form) {
-
-    return Column(
-      children: [
-
-        if (form.title != null || form.desc != null)
-          widget.formHeader?.call(form) ?? _DefaultFormHeaderBuilder(form: form),
-
-        SeparatedColumn(
-          data: form.fieldsMatrix,
-          itemBuilder: (_,i) => _buildRow(form.fieldsMatrix[i]),
-          separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
-        ),
-
-        SeparatedColumn(
-          data: form.subforms ?? [],
-          itemBuilder: (_,i) => _buildSubform(form.subforms![i]),
-          separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
-        ),
-
-      ],
     );
   }
+}
+
+class DynamicForm extends StatelessWidget {
+
+  const DynamicForm({super.key,
+    required this.controller,
+    this.style = const FormFieldStyle()
+  });
+
+  final FormController controller;
+  final FormFieldStyle style;
 
   @override
   Widget build(BuildContext context) {
 
-
-    if (widget.controller is MultipleFormController) {
+    if (controller is MultipleFormController) {
 
       return AnimatedBuilder(
-        animation: widget.controller as MultipleFormController,
-        builder: (context, child) {
-          var forms = (widget.controller as MultipleFormController).forms;
-          return SeparatedColumn(
-            data: forms,
-            itemBuilder: (_,i) => _buildForm(forms[i]),
-            separatorBuilder: (_,i) => SizedBox(height: widget.verticalSpacing),
-          );
-        }
+          animation: controller as MultipleFormController,
+          builder: (context, child) {
+            var forms = (controller as MultipleFormController).forms;
+            return SeparatedColumn(
+              data: forms,
+              itemBuilder: (_,i) => FormBuilder(form: forms[i], style: style),
+              separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
+            );
+          }
       );
     } else {
-      return _buildForm((widget.controller as SingleFormController).form);
+      return FormBuilder(form: (controller as SingleFormController).form, style: style);
     }
-
   }
 }
 
+class FormBuilder extends StatelessWidget {
+
+  final FormModel form;
+  final FormFieldStyle style;
+
+  const FormBuilder({
+    super.key,
+    required this.form,
+    this.style = const FormFieldStyle(),
+  });
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+
+        if (form.title != null || form.desc != null)
+         style.formHeaderBuilder(form),
+
+        FormFieldsBuilder(fields: form.fieldsMatrix, style: style),
+
+        SeparatedColumn(
+          data: form.subforms ?? [],
+          itemBuilder: (_,i) => SubformBuilder(subform: form.subforms![i], style: style),
+          separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
+        ),
+
+      ],
+    );
+  }
+}
+
+class SubformBuilder extends StatelessWidget {
+
+  final FormModel subform;
+  final FormFieldStyle style;
+
+  const SubformBuilder({super.key,
+    required this.subform,
+    this.style = const FormFieldStyle(),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        SizedBox(height: style.verticalSpacing),
+
+        if ((subform.title != null && subform.title!.isNotEmpty) || (subform.desc != null && subform.desc!.isNotEmpty))
+          style.subformHeaderBuilder(subform),
+
+        FormFieldsBuilder(fields: subform.fieldsMatrix, style: style),
+
+        SeparatedColumn(
+          data: subform.subforms ?? [],
+          itemBuilder: (_,i) => SubformBuilder(subform: subform.subforms![i], style: style),
+          separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
+        ),
+
+      ],
+    );
+  }
+}
+
+class FormFieldsBuilder extends StatelessWidget {
+
+  final List<List<DynamicFormFieldState>> fields;
+  final FormFieldStyle style;
+
+  const FormFieldsBuilder({
+    super.key,
+    required this.fields,
+    this.style = const FormFieldStyle(),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    return SeparatedColumn(
+      data: fields,
+      itemBuilder: (_,columnIndex) {
+        var row = fields[columnIndex];
+        return SeparatedRow(
+          data: row,
+          separatorBuilder: (_,i) => SizedBox(width: style.runningSpacing),
+          itemBuilder: (_,rowIndex) {
+            var state = row[rowIndex];
+            if (state.configuration.flex != null) {
+              return Expanded(
+                  flex: state.configuration.flex!,
+                  child: FieldBuilder(state: state, style: style)
+              );
+            }else{
+              return Flexible(child: FieldBuilder(state: state, style: style));
+            }
+          },
+        );
+      },
+      separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
+    );
+
+  }
+}
 
 class _DefaultFormHeaderBuilder extends StatelessWidget {
 
@@ -292,7 +323,6 @@ class _DefaultSubFormHeaderBuilder extends StatelessWidget {
 
         if (subform.desc != null)
           Text(subform.desc!, style: Theme.of(context).textTheme.labelSmall),
-
 
       ],
     );

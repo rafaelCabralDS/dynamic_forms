@@ -130,10 +130,5 @@ final class TextFieldState extends BaseTextFieldState {
   @override
   bool validator(String? v) => v != null && v.isNotEmpty;
 
-  @override
-  bool validate([String invalidMsg = "Campo inválido"]) {
-    return isValid;
-  }
-
 
 }

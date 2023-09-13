@@ -1,6 +1,6 @@
 name: dynamic_forms
 description: A new Flutter package project.
-version: 0.7.0
+version: 0.8.0
 homepage:
 
 environment:
@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   mask_text_input_formatter: ^2.5.0
+  file_picker: ^5.5.0
 
 dev_dependencies:
   flutter_test:

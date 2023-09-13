@@ -1,6 +1,5 @@
 import 'package:dynamic_forms/field_state.dart';
 import 'package:dynamic_forms/form_field_configuration.dart';
-import 'package:dynamic_forms/form_field_types/text_fields/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,6 +9,7 @@ export 'password_field.dart';
 export 'email_field.dart';
 export 'cpf_cnpj_field.dart';
 export 'phone_field.dart';
+export 'date_field.dart';
 
 
 enum AvailableTextFieldInputTypes {
@@ -131,6 +131,17 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
       case AvailableTextFieldInputTypes.date: return DateTextFieldState.fromJSON(json);
     }
 
+  }
+
+  @override
+  bool validate([String invalidMsg = "Campo inválido"]) {
+    if (!isValid && error == null) {
+      error = invalidMsg;
+    }
+    if (isValid && error != null) {
+      error = null;
+    }
+    return isValid;
   }
 
 

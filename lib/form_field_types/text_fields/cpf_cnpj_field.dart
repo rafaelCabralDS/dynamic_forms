@@ -1,5 +1,6 @@
 import 'package:dynamic_forms/field_state.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
 
 final class CpfFieldConfiguration extends BaseTextFormFieldConfiguration {
 
@@ -98,6 +99,9 @@ final class CpfFieldState extends BaseTextFieldState {
     const cpfRegex = r'^\d{3}\.\d{3}\.\d{3}\-\d{2}$';
     return RegExp(cpfRegex).hasMatch(v);
   }
+
+
+
 
 }
 

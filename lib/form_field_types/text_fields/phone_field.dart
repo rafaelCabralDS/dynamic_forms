@@ -1,6 +1,7 @@
 import 'package:dynamic_forms/field_state.dart';
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
 
 final class PhoneFieldConfiguration extends BaseTextFormFieldConfiguration {
 
@@ -54,7 +55,6 @@ final class PhoneFieldState extends BaseTextFieldState {
 
   @override
   PhoneFieldConfiguration get configuration => super.configuration as PhoneFieldConfiguration;
-
 
   @override
   bool validator(String? v) {

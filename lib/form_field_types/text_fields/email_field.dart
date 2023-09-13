@@ -1,6 +1,6 @@
 import 'package:dynamic_forms/field_state.dart';
 import 'package:flutter/material.dart';
-
+import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
 
 
 final class EmailFieldConfiguration extends BaseTextFormFieldConfiguration {
@@ -61,15 +61,6 @@ final class EmailFieldState extends BaseTextFieldState {
   }
 
   @override
-  bool validate([String? invalidMsg = "Campo inválido"]) {
-    if (!isValid && error == null) {
-      error = 'Email inválido';
-    }
-
-    if (isValid && error != null){
-      error = null;
-    }
-    return isValid;
-  }
+  bool validate([String? invalidMsg = "Campo inválido"]) => super.validate('Email inválido');
 
 }

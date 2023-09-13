@@ -1,4 +1,5 @@
 import 'package:dynamic_forms/field_state.dart';
+import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
 import 'package:flutter/material.dart';
 
 
@@ -61,23 +62,13 @@ final class PasswordFieldState extends BaseTextFieldState {
   }
 
   @override
-  bool validate([String? invalidMsg = "Campo inválido"]) {
-    if (value == null) return false;
-    if (!isValid && error == null) {
-      error = passwordCriteria;
-    }
-    if (isValid && error != null) {
-      error = null;
-    }
-
-    return isValid;
-  }
+  bool validate([String? invalidMsg = passwordCriteria]) => super.validate(passwordCriteria);
 
 }
 
-class PasswordDefaultTextFieldBuilder extends StatefulWidget {
+class DefaultPasswordTextFieldBuilder extends StatefulWidget {
 
-  const PasswordDefaultTextFieldBuilder({
+  const DefaultPasswordTextFieldBuilder({
     super.key,
     required this.state,
   });
@@ -85,10 +76,10 @@ class PasswordDefaultTextFieldBuilder extends StatefulWidget {
   final PasswordFieldState state;
 
   @override
-  State<PasswordDefaultTextFieldBuilder> createState() => _PasswordDefaultTextFieldBuilderState();
+  State<DefaultPasswordTextFieldBuilder> createState() => _DefaultPasswordTextFieldBuilderState();
 }
 
-class _PasswordDefaultTextFieldBuilderState extends State<PasswordDefaultTextFieldBuilder> {
+class _DefaultPasswordTextFieldBuilderState extends State<DefaultPasswordTextFieldBuilder> {
 
   late final TextEditingController _editingController;
 

@@ -1,4 +1,6 @@
+import 'package:dynamic_forms/dynamic_forms.dart';
 import 'package:dynamic_forms/form_controller.dart';
+import 'package:dynamic_forms/form_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -10,7 +12,7 @@ void main() {
 
     final controller = MultipleFormController(forms: [form1, form2, form3]);
 
-    final result = controller.getByKey('form2');
+    final result = controller.getFormByKey('form2');
 
     expect(result, isNotNull);
     expect(result.title, 'Form 2');
@@ -23,7 +25,7 @@ void main() {
 
     final controller = MultipleFormController(forms: [form1, form2, form3]);
 
-    expect(controller.getByKey('nonexistent_key'), throwsException);
+    expect(controller.getFormByKey('nonexistent_key'), throwsException);
   });
 
   test('Adding a form to the controller', () {
@@ -125,6 +127,40 @@ void main() {
 
     expect(controller.forms.length, 2);
     expect(controller.forms[1].title, 'Form 2');
+
+  });
+
+
+
+  test("[MultipleFormController.getFieldByKey]", (){
+
+    final form1 = FormModel.vertical(key: 'form1', title: 'Form 1', fields: [
+      TextFieldState(key: "key1"),
+      TextFieldState(key: "key2"),
+      TextFieldState(key: "key3"),
+    ]);
+    final form2 = FormModel.singleField(field: TextFieldState(key: "key3"));
+    final form3 = FormModel(key: 'form3', title: 'Form 3', fields: [
+      [TextFieldState(key: "key1")]
+    ],
+      subforms: [
+        FormModel.singleField(field: TextFieldState(key: "key2")),
+        FormModel.vertical(key: "subform",fields: [TextFieldState(key: "key3")]),
+      ]
+    );
+    //final form4 = FormModel.vertical(key: "form4", fields: [TextFieldState(key: "key3")]);
+
+
+    final controller = MultipleFormController(forms: [form1, form2, form3]);
+
+
+    expect(controller.getFieldByKey("form1.key1").key, "key1");
+
+    expect(controller.getFieldByKey("key3").key, "key3");
+
+    expect(controller.getFieldByKey("form3.key1").key, "key1");
+
+    expect(controller.getFieldByKey("form3.subform.key3").key, "key3");
 
   });
 
