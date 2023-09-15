@@ -32,7 +32,7 @@ final class ExpandableFieldConfiguration extends FormFieldConfiguration {
 
 }
 
-sealed class ExpandableBaseFieldState<T> extends DynamicFormFieldState<List<T>> {
+abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<List<T>> {
 
   ExpandableBaseFieldState({
     required super.key,
@@ -153,20 +153,19 @@ final class ExpandableFormFieldState extends ExpandableBaseFieldState<FormModel>
 
 }
 
-class BuildExpandableFormField extends StatelessWidget {
+class BuildExpandableField extends StatelessWidget {
 
   final ExpandableBaseFieldState state;
-  final FormFieldStyle style;
 
-  const BuildExpandableFormField({
+  const BuildExpandableField({
     super.key,
     required this.state,
-    required this.style,
   });
 
   @override
   Widget build(BuildContext context) {
 
+    var style = DynamicFormTheme.of(context);
 
     return Column(
       children: [
@@ -177,7 +176,7 @@ class BuildExpandableFormField extends StatelessWidget {
               itemBuilder: (_,i) => Row(
                 children: [
 
-                  Expanded(child: SubformBuilder(subform: state.value[i], style: style)),
+                  Expanded(child: SubformBuilder(subform: state.value[i])),
 
                   if (state.length > state.configuration.minFields)
                     TextButton(
@@ -204,7 +203,7 @@ class BuildExpandableFormField extends StatelessWidget {
               style: ButtonStyle(
                 side: MaterialStatePropertyAll(BorderSide(width: 2, color: Theme.of(context).colorScheme.secondary)),
                 shape: MaterialStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0))),
-                fixedSize: MaterialStatePropertyAll(Size.square(30.0))
+                fixedSize: const MaterialStatePropertyAll(Size.square(30.0))
               ),
               child: const Icon(Icons.add_rounded),
           ),

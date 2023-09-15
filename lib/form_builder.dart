@@ -1,11 +1,14 @@
 import 'package:dynamic_forms/form_controller.dart';
 import 'package:dynamic_forms/form_field_types/expandable_field.dart';
 import 'package:dynamic_forms/form_field_types/file_field.dart';
+import 'package:dynamic_forms/form_field_types/table_field/table_field_state.dart';
 import 'package:dynamic_forms/form_model.dart';
 import 'package:dynamic_forms/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide FormFieldBuilder, FormFieldState;
 import 'field_state.dart';
 import 'form_field_configuration.dart';
+import 'form_field_types/table_field/table_components.dart';
 
 
 typedef FormFieldBuilder<T> = Widget Function(DynamicFormFieldState<T> field);
@@ -24,11 +27,11 @@ typedef CheckboxFormFieldBuilder = Widget Function(CheckboxFieldState field);
 typedef DropdownFormFieldBuilder<T extends Object> = Widget Function(DropdownFieldState<T> field);
 typedef SwitcherFormFieldBuilder = Widget Function(SwitchFieldState field);
 typedef FileFormFieldBuilder = Widget Function(FilePickerFieldState field);
-typedef ExpandableFieldBuilder = Widget Function(ExpandableFieldState field);
+typedef ExpandableFieldBuilder = Widget Function(ExpandableBaseFieldState field);
 
 
-
-final class FormFieldStyle {
+@immutable
+class DynamicFormThemeData with Diagnosticable {
 
   /// If defined, all non defined specific field builder will fallback
   /// on this builder. Otherwise, they fall into [DefaultTextFieldBuilder]
@@ -44,6 +47,7 @@ final class FormFieldStyle {
   final DateTextFormFieldBuilder dateTextFormFieldBuilder;
   final SwitcherFormFieldBuilder switchFormFieldBuilder;
   final FileFormFieldBuilder fileFormFieldBuilder;
+  final ExpandableFieldBuilder expandableFieldBuilder;
 
   /// A map that overrides the default fields builders for specific field
   /// by the key value
@@ -55,7 +59,7 @@ final class FormFieldStyle {
   final FormHeaderBuilder formHeaderBuilder;
   final FormHeaderBuilder subformHeaderBuilder;
 
-  const FormFieldStyle({
+  const DynamicFormThemeData({
     this.baseTextFormFieldBuilder = defaultTextFormFieldBuilder,
     TextFormFieldBuilder? textFieldBuilder,
     CpfFormFieldBuilder? cpfFieldBuilder,
@@ -73,6 +77,7 @@ final class FormFieldStyle {
     this.customFieldsBuilder,
     this.formHeaderBuilder = defaultFormHeaderBuilder,
     this.subformHeaderBuilder = defaultSubformHeaderBuilder,
+    this.expandableFieldBuilder = defaultExpandableFieldBuilder,
   })  :
         textFieldBuilder = textFieldBuilder ?? baseTextFormFieldBuilder,
         cpfFieldBuilder = cpfFieldBuilder ?? baseTextFormFieldBuilder,
@@ -90,20 +95,57 @@ final class FormFieldStyle {
   static Widget defaultFilePickerFormFieldBuilder(FilePickerFieldState state) => DefaultFilePickerBuilder(state: state);
   static Widget defaultFormHeaderBuilder(FormModel form) => _DefaultFormHeaderBuilder(form: form);
   static Widget defaultSubformHeaderBuilder(FormModel subform) => _DefaultSubFormHeaderBuilder(subform: subform);
+  static Widget defaultExpandableFieldBuilder(ExpandableBaseFieldState state) => BuildExpandableField(state: state);
 
 }
+
+
+class DynamicFormTheme extends InheritedTheme {
+  /// Applies the given theme [data] to [child].
+  const DynamicFormTheme({Key? key, required this.data, required super.child})
+      : super(key: key);
+
+  final DynamicFormThemeData data;
+
+
+  /// The data from the closest [SfDataGridTheme]
+  /// instance that encloses the given context.
+  ///
+  /// Defaults to [SfThemeData.dataGridThemeData] if there
+  /// is no [SfDataGridTheme] in the given build context.
+  ///
+  static DynamicFormThemeData of(BuildContext context) {
+    final DynamicFormTheme? sfDataGridTheme = context.dependOnInheritedWidgetOfExactType<DynamicFormTheme>();
+    return sfDataGridTheme?.data ?? const DynamicFormThemeData();
+  }
+
+  @override
+  bool updateShouldNotify(DynamicFormTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final DynamicFormTheme? ancestorTheme =
+    context.findAncestorWidgetOfExactType<DynamicFormTheme>();
+    return identical(this, ancestorTheme)
+        ? child
+        : DynamicFormTheme(data: data, child: child);
+  }
+}
+
 
 class FieldBuilder extends StatelessWidget {
 
   final DynamicFormFieldState state;
-  final FormFieldStyle style;
 
   const FieldBuilder({super.key,
     required this.state,
-    this.style = const FormFieldStyle()});
+  });
 
   @override
   Widget build(BuildContext context) {
+
+    var style = DynamicFormTheme.of(context);
+
     return AnimatedBuilder(
         animation: state,
         builder: (context, child) {
@@ -136,7 +178,9 @@ class FieldBuilder extends StatelessWidget {
             case FormFieldType.file:
               return style.fileFormFieldBuilder.call(state as FilePickerFieldState);
             case FormFieldType.expandable:
-              return BuildExpandableFormField(state: state as ExpandableBaseFieldState, style: style);
+              return style.expandableFieldBuilder.call(state as ExpandableBaseFieldState);
+            case FormFieldType.table:
+              return TableFieldBuilder(state: state as TableFieldState);
           }
         }
     );
@@ -147,48 +191,59 @@ class DynamicForm extends StatelessWidget {
 
   const DynamicForm({super.key,
     required this.controller,
-    this.style = const FormFieldStyle()
+    required this.style,
   });
 
   final FormController controller;
-  final FormFieldStyle style;
+  final DynamicFormThemeData style;
 
   @override
   Widget build(BuildContext context) {
 
-    if (controller is MultipleFormController) {
+    return DynamicFormTheme(
+        data: style,
+        child: Builder(
+          builder: (_) {
+            if (controller is MultipleFormController) {
 
-      return AnimatedBuilder(
-          animation: controller as MultipleFormController,
-          builder: (context, child) {
-            var forms = (controller as MultipleFormController).forms;
-            return SeparatedColumn(
-              data: forms,
-              itemBuilder: (_,i) => FormBuilder(form: forms[i], style: style),
-              separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
-            );
-          }
-      );
-    } else {
-      return FormBuilder(form: (controller as SingleFormController).form, style: style);
-    }
+              return AnimatedBuilder(
+                  animation: controller as MultipleFormController,
+                  builder: (context, child) {
+                    var forms = (controller as MultipleFormController).forms;
+                    return SeparatedColumn(
+                      data: forms,
+                      itemBuilder: (_,i) => FormBuilder(form: forms[i]),
+                      separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
+                    );
+                  }
+              );
+            } else {
+              return FormBuilder(form: (controller as SingleFormController).form);
+            }
+          },
+        )
+    );
+
+
+
   }
 }
 
 class FormBuilder extends StatelessWidget {
 
   final FormModel form;
-  final FormFieldStyle style;
 
   const FormBuilder({
     super.key,
     required this.form,
-    this.style = const FormFieldStyle(),
   });
 
 
   @override
   Widget build(BuildContext context) {
+
+    var style = DynamicFormTheme.of(context);
+
     return Column(
       children: [
 
@@ -199,7 +254,7 @@ class FormBuilder extends StatelessWidget {
 
         SeparatedColumn(
           data: form.subforms ?? [],
-          itemBuilder: (_,i) => SubformBuilder(subform: form.subforms![i], style: style),
+          itemBuilder: (_,i) => SubformBuilder(subform: form.subforms![i]),
           separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
         ),
 
@@ -211,15 +266,16 @@ class FormBuilder extends StatelessWidget {
 class SubformBuilder extends StatelessWidget {
 
   final FormModel subform;
-  final FormFieldStyle style;
 
   const SubformBuilder({super.key,
     required this.subform,
-    this.style = const FormFieldStyle(),
   });
 
   @override
   Widget build(BuildContext context) {
+
+    var style = DynamicFormTheme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -233,7 +289,7 @@ class SubformBuilder extends StatelessWidget {
 
         SeparatedColumn(
           data: subform.subforms ?? [],
-          itemBuilder: (_,i) => SubformBuilder(subform: subform.subforms![i], style: style),
+          itemBuilder: (_,i) => SubformBuilder(subform: subform.subforms![i]),
           separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
         ),
 
@@ -245,16 +301,18 @@ class SubformBuilder extends StatelessWidget {
 class FormFieldsBuilder extends StatelessWidget {
 
   final List<List<DynamicFormFieldState>> fields;
-  final FormFieldStyle style;
+  final DynamicFormThemeData? style;
 
   const FormFieldsBuilder({
     super.key,
     required this.fields,
-    this.style = const FormFieldStyle(),
+    this.style,
   });
 
   @override
   Widget build(BuildContext context) {
+
+    var style = this.style ?? DynamicFormTheme.of(context);
 
     return SeparatedColumn(
       data: fields,
@@ -268,10 +326,10 @@ class FormFieldsBuilder extends StatelessWidget {
             if (state.configuration.flex != null) {
               return Expanded(
                   flex: state.configuration.flex!,
-                  child: FieldBuilder(state: state, style: style)
+                  child: FieldBuilder(state: state)
               );
             }else{
-              return Flexible(child: FieldBuilder(state: state, style: style));
+              return Flexible(child: FieldBuilder(state: state));
             }
           },
         );

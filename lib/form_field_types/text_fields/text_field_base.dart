@@ -101,7 +101,6 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
     super.enabled,
   }) : _hidden = hidden, super(configuration: configuration);
 
-
   // States that can change this parameter, must implement the setters
   bool _hidden;
   bool get hidden => _hidden;

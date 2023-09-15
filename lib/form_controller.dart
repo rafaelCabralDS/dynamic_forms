@@ -17,6 +17,9 @@ abstract interface class FormController {
 
   void clearErrors();
   Map<String, dynamic> toJSON();
+  DynamicFormFieldState findByKey(String key);
+  void clear();
+
 }
 
 class SingleFormController implements FormController {
@@ -63,6 +66,14 @@ class SingleFormController implements FormController {
     }
   }
 
+  @override
+  void clear() {
+    for (var e in fields) {
+      e.reset();
+    }
+  }
+
+  @override
   DynamicFormFieldState findByKey(String key) {
     try {
       return fields.singleWhere((element) => element.key == key);
@@ -129,6 +140,14 @@ class MultipleFormController extends ChangeNotifier implements FormController {
     }
   }
 
+  @override
+  void clear() {
+    for (var e in fields) {
+      e.reset();
+    }
+  }
+
+
   FormModel add(FormModel form) {
     assert(form.key != null && form.key!.isNotEmpty, "Only root forms can have a null key");
     assert(!_forms.map((e) => e.key).contains(form.key), "There is already a form by the key ${form.key}");
@@ -183,8 +202,8 @@ class MultipleFormController extends ChangeNotifier implements FormController {
     }
   }
 
-
-  DynamicFormFieldState getFieldByKey(String fieldKey) {
+  @override
+  DynamicFormFieldState findByKey(String fieldKey) {
 
     try {
       var keys = fieldKey.split(".");

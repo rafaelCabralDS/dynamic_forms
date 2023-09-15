@@ -1,5 +1,6 @@
 import 'package:dynamic_forms/form_field_configuration.dart';
 import 'package:dynamic_forms/form_field_types/file_field.dart';
+import 'package:dynamic_forms/form_field_types/table_field/table_field_state.dart';
 import 'package:flutter/material.dart';
 
 import 'form_field_types/expandable_field.dart';
@@ -25,6 +26,7 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
         _enabled = enabled ?? true,
         _value = initialValue,
         isRequired = isRequired ?? true;
+
 
   final String key;
   final FormFieldConfiguration configuration;
@@ -104,6 +106,7 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
   /// transform a [DateTime] value into a [Timestamp] to firestore
   MapEntry<String, dynamic> asJsonEntry() => MapEntry(key, value);
 
+
   /// Translates a map in the format
   /// { KEY : key_name, }
   /// into a FormFieldState.
@@ -121,6 +124,7 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
       case FormFieldType.dropdownMenu: return DropdownFieldState.fromJSON(json) as DynamicFormFieldState<T>;
       case FormFieldType.file: return FilePickerFieldState.fromJSON(json) as DynamicFormFieldState<T>;
       case FormFieldType.expandable: return ExpandableFieldState.fromJSON(json) as DynamicFormFieldState<T>;
+      case FormFieldType.table: return TableFieldState.fromJSON(json) as DynamicFormFieldState<T>;
     }
     
   }

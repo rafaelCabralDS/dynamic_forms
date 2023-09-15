@@ -4,6 +4,7 @@ import 'package:dynamic_forms/form_field_types/dropdown_field.dart';
 import 'package:dynamic_forms/form_field_types/expandable_field.dart';
 import 'package:dynamic_forms/form_field_types/file_field.dart';
 import 'package:dynamic_forms/form_field_types/switcher_field.dart';
+import 'package:dynamic_forms/form_field_types/table_field/table_field_state.dart';
 import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
 
 export 'form_field_types/dropdown_field.dart';
@@ -17,7 +18,8 @@ enum FormFieldType {
   checkbox("checkbox"),
   dropdownMenu("dropdown"),
   file("file"),
-  expandable("expandable");
+  expandable("expandable"),
+  table("table");
 
   final String key;
   const FormFieldType(this.key);
@@ -64,6 +66,7 @@ base class FormFieldConfiguration {
       case FormFieldType.dropdownMenu: return DropdownFieldConfiguration.fromJSON(json);
       case FormFieldType.file: return FileFieldConfiguration.fromJSON(json);
       case FormFieldType.expandable: return ExpandableFieldConfiguration.fromJSON(json);
+      case FormFieldType.table: return TableFieldConfiguration.fromJSON(json);
     }
   }
 

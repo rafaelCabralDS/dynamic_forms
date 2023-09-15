@@ -16,22 +16,18 @@ enum SupportedFiles {
 
   const SupportedFiles(this.extensions);
 
-  static List<String> asExtensionList(List<SupportedFiles> files) => files.expand((element) => element.extensions).toList();
-
-  static List<SupportedFiles> fromExtensions(List<String> extensions) {
-
-    var supported = <SupportedFiles>[];
-
-    for (var ext in extensions) {
-      for (var type in SupportedFiles.values) {
-        if (type.extensions.contains(ext) || type.name == ext) {
-          supported.add(type);
-        }
+  static SupportedFiles fromExtension(String ext) {
+    for (var type in SupportedFiles.values) {
+      if (type.extensions.contains(ext) || type.name == ext) {
+        return type;
       }
     }
-
-    return supported;
+    throw "Unsupported file type";
   }
+
+  static List<String> asExtensionList(List<SupportedFiles> files) => files.expand((element) => element.extensions).toList();
+
+  static List<SupportedFiles> fromExtensions(List<String> extensions) => extensions.map((e) => fromExtension(e)).toList();
 
 }
 
@@ -39,14 +35,18 @@ final class FileFieldConfiguration extends FormFieldConfiguration {
 
   static const String KEY_SUPPORTED_FILES = "supported_files";
   static const String KEY_MULTIPLE_FILES = "multiple";
+  static const String KEY_LIMIT = "limit";
+
 
   final bool multiplePicks;
+  final int limit;
 
   const FileFieldConfiguration({
     super.flex,
     super.label,
     required this.supportedInputFiles,
     this.multiplePicks = true,
+    this.limit = 1000,
   }) : super(
     formType: FormFieldType.file,
   );
@@ -55,10 +55,12 @@ final class FileFieldConfiguration extends FormFieldConfiguration {
     String? label,
     int? flex,
     bool? multiplePicks = true,
+    int? limit
   }) : this(
       flex: flex,
       label: label,
       supportedInputFiles: SupportedFiles.values,
+      limit: limit ?? 1000
   );
 
 
@@ -67,6 +69,7 @@ final class FileFieldConfiguration extends FormFieldConfiguration {
       flex: json[FormFieldConfiguration.KEY_FLEX],
       label: json[FormFieldConfiguration.KEY_LABEL],
       multiplePicks: json[KEY_MULTIPLE_FILES],
+      limit: json[KEY_LIMIT]
   );
 
   final List<SupportedFiles> supportedInputFiles;
@@ -91,6 +94,8 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
   @override
   List<PlatformFile> get value => super.value!;
 
+  bool get isFull => value.length == configuration.limit;
+
   @override
   bool validator(List<PlatformFile>? v) => v != null;
 
@@ -104,7 +109,7 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
   }
 
   Future<void> pick() async {
-
+    assert (value.length < (configuration.limit ?? 1000), "Too many files have being picker already");
     try {
 
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -121,6 +126,11 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
       error = "nonNullErrorValue";
     }
 
+  }
+
+  void remove(PlatformFile e) {
+    value.remove(e);
+    notifyListeners();
   }
 
 }

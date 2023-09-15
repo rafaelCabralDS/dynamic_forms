@@ -2,7 +2,7 @@
 
 import 'package:dynamic_forms/field_state.dart';
 import 'package:dynamic_forms/utils.dart';
-
+import 'package:collection/collection.dart';
 class FormModel {
 
   static const String FORM_KEY = "form"; // Field name
@@ -25,6 +25,9 @@ class FormModel {
   /// Return the fields in the main form only (Not the fields from the subform)
   List<DynamicFormFieldState> get expandedMainFields => _fields.expand((e) => e).where((e) => !e.key.startsWith("_")).toList();
 
+  /// All fields in the entire tree
+  /// Note: it might have repeated keys in this list, since it cant only be repeated keys in the same level
+  /// but not in different levels (Ex: two distinct subforms with a shared key field name)
   List<DynamicFormFieldState> get allFields {
     final List<DynamicFormFieldState> data = List.from(expandedMainFields);
     for (final FormModel subform in (subforms ?? [])) {
@@ -33,7 +36,11 @@ class FormModel {
     return data;
   }
 
+  /// A single field contains only one field that is not a subform
   bool get isSingleFormField => allFields.length == 1 && key == allFields[0].key;
+
+  /// The list of keys in the first layer. Does not include subform field keys neither private keys
+  List<String> get keys => expandedMainFields.map((e) => e.key).toList();
 
   FormModel._({
     required this.key,
@@ -42,10 +49,22 @@ class FormModel {
     this.subforms,
     required List<List<DynamicFormFieldState>> fields,
   }) : _fields = fields {
-    var duplicates = _fields.expand((element) => element).map((e) => e.key).toList().getDuplicates();
+    var duplicates = fields.expand((element) => element).map((e) => e.key).toList().getDuplicates();
     assert(duplicates.isEmpty, "As chaves $duplicates estão repetidas ao menos uma vez");
     assert(key == null || (subforms?.every((e) => e.key != null) ?? true),
     "The parent form key must be null while all subforms keys must be defined");
+
+    /*
+    _fields = [];
+    for (List<DynamicFormFieldState> outerList in fields) {
+      var mappedOuter = [];
+      for (DynamicFormFieldState field in outerList) {
+        mappedOuter.add(field.copyWith(parentKey: key));
+      }
+    }
+
+     */
+
   }
 
   FormModel({
@@ -182,6 +201,29 @@ class FormModel {
     for (var field in allFields) {
       field.reset();
     }
+  }
+
+  static bool patternMatching(FormModel v1, FormModel v2) {
+
+    var sameKeys = {v1.expandedMainFields.map((e) => e.key)}
+        .difference({v2.expandedMainFields.map((e) => e.key)}).isEmpty;
+
+    if (!sameKeys) return false;
+
+    var sameTypes = {v1.expandedMainFields.map((e) => MapEntry(e.key, e.runtimeType))}
+        .difference({v2.expandedMainFields.map((e) => MapEntry(e.key, e.runtimeType))}).isEmpty;
+
+    if (!sameTypes) return false;
+
+    for (FormModel subform1 in v1.subforms ?? []) {
+
+      var matchingSubform = v2.subforms?.singleWhereOrNull((e) => e.key == subform1.key);
+      if (matchingSubform == null) return false;
+
+      var subformMatches = patternMatching(subform1, matchingSubform);
+      if (!subformMatches) return false;
+    }
+    return true;
   }
 
 }
