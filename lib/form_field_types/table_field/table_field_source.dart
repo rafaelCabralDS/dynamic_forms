@@ -17,10 +17,16 @@ class TableFieldGridSource extends DataGridSource {
   @override
   List<DataGridRow> get rows => state.value.map(_formToRow).toList();
 
-  DataGridRow _formToRow(FormModel e) => DataGridRow(cells: e.allFields.map((e) => DataGridCell(
-      columnName: e.key,
-      value: e.value
-  )).toList());
+  DataGridRow _formToRow(FormModel e) {
+    return DataGridRow(cells: e.allFields.map((e) => DataGridCell<DynamicFormFieldState>(
+        columnName: e.configuration.label ?? e.key,
+        value: e
+    )).toList());
+  }
+
+  List<StackedHeaderRow> headers() {
+    return [];
+  }
 
 
   /// /////////////////////////////////////////////////////////////// Editing //////////////////////////////////////////////////////////////////////////////
@@ -41,7 +47,10 @@ class TableFieldGridSource extends DataGridSource {
 
     if (cellField.validator(_inputValue)) {
       cellField.value = _inputValue;
-      rows[rowColumnIndex.rowIndex].getCells()[rowColumnIndex.columnIndex] = DataGridCell(columnName: column.columnName, value: _inputValue);
+      rows[rowColumnIndex.rowIndex].getCells()[rowColumnIndex.columnIndex] = DataGridCell<DynamicFormFieldState>(
+          columnName: column.columnName,
+          value: cellField
+      );
     }
 
     notifyDataSourceListeners();
@@ -60,12 +69,12 @@ class TableFieldGridSource extends DataGridSource {
         .getCells()
         .firstWhereOrNull((DataGridCell dataGridCell) => dataGridCell.columnName == column.columnName)?.value?.toString() ?? '';
 
+
     if (field.configuration.formType == FormFieldType.textField) {
       fieldConfiguration = fieldConfiguration as BaseTextFormFieldConfiguration;
 
       return Container(
         padding: const EdgeInsets.all(8.0),
-        //color: Colors.red,
         child: TextField(
           autofocus: true,
           onTapOutside: (_) => submitCell(),
@@ -73,6 +82,7 @@ class TableFieldGridSource extends DataGridSource {
           inputFormatters: fieldConfiguration.formatter != null ? [fieldConfiguration.formatter!] : null,
           decoration: InputDecoration(
             hintText: displayText,
+
           ),
         ),
       );
@@ -88,7 +98,7 @@ class TableFieldGridSource extends DataGridSource {
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
     return DataGridRowAdapter(cells: row.getCells()
-        .map<Widget>((e) => DefaultTableCell(cell: e))
+        .map<Widget>((e) => DefaultTableCell(cell: e as DataGridCell<DynamicFormFieldState>))
         .toList());
   }
 

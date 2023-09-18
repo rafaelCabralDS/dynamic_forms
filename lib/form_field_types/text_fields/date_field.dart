@@ -85,8 +85,8 @@ final class DateTextFieldConfiguration extends BaseTextFormFieldConfiguration {
         maxDate = DateTime.now();
       }
       case "custom": {
-        minDate = (json["min_date"] as  String).parseAsBrDate();
-        maxDate = (json["max_date"] as String).parseAsBrDate();
+        minDate = DateTime.parse((json["min_date"] as String).replaceAll("/", "-"));
+        maxDate = DateTime.parse((json["max_date"] as String).replaceAll("/", "-"));
       }
       default: {
         minDate = DateTime(1);
@@ -135,7 +135,7 @@ final class DateTextFieldState extends BaseTextFieldState {
     if (v == null) return false;
     DateTime date;
     try {
-      date = v.parseAsBrDate();
+      date = DateTime.parse(v.replaceAll("/", "-"));
     } catch (e) {
       return false;
     }
@@ -160,7 +160,7 @@ final class DateTextFieldState extends BaseTextFieldState {
     /// Check for range errors
     if (value?.length == 8 && error != null) {
 
-      var date = value!.parseAsBrDate();
+      var date = DateTime.parse(value!.replaceAll("/", "-"));
       var tooEarlyError = "Data deve ser posterior a $date";
       var tooLateError = "Data deve ser inferior a $date";
 
@@ -180,6 +180,7 @@ final class DateTextFieldState extends BaseTextFieldState {
 
 ////////////////////////////////////////////////// UTILS ////////////////////////////////////////////////
 
+/*
 extension DateTimeParsing on String {
   DateTime parseAsBrDate() {
     final datePattern1 = RegExp(r'(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})');
@@ -201,6 +202,8 @@ extension DateTimeParsing on String {
     }
   }
 }
+
+ */
 
 class DateTextFormatter extends TextInputFormatter {
   static const _maxChars = 8;

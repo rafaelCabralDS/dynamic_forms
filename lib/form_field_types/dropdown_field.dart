@@ -101,8 +101,6 @@ class _DefaultDropdownFieldBuilderState<T extends Object> extends State<DefaultD
   @override
   void initState() {
     _controller = TextEditingController(text: widget.state.value?.toString());
-    //widget.state.listenItself((stateValue) {});
-
     super.initState();
   }
 

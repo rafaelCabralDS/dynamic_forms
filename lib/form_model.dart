@@ -2,6 +2,7 @@
 
 import 'package:dynamic_forms/field_state.dart';
 import 'package:dynamic_forms/utils.dart';
+
 import 'package:collection/collection.dart';
 class FormModel {
 
@@ -18,7 +19,11 @@ class FormModel {
   final String? title;
   final String? desc;
   late final List<List<DynamicFormFieldState>> _fields;
-  late final List<FormModel>? subforms;
+  late final List<FormModel> subforms;
+
+  /// A form that [shouldShrink] will ignore the parent key when parsing to json,
+  /// This can be useful to create visually separated forms, but with no subdivision in the json format
+  final bool shouldShrink;
 
   List<List<DynamicFormFieldState>> get fieldsMatrix => _fields;
 
@@ -30,7 +35,7 @@ class FormModel {
   /// but not in different levels (Ex: two distinct subforms with a shared key field name)
   List<DynamicFormFieldState> get allFields {
     final List<DynamicFormFieldState> data = List.from(expandedMainFields);
-    for (final FormModel subform in (subforms ?? [])) {
+    for (final FormModel subform in (subforms)) {
       data.addAll(subform.allFields);
     }
     return data;
@@ -42,28 +47,36 @@ class FormModel {
   /// The list of keys in the first layer. Does not include subform field keys neither private keys
   List<String> get keys => expandedMainFields.map((e) => e.key).toList();
 
+
+  List<String> get treeKeys {
+
+    var keysWithParent = <String>[];
+    for (var e in expandedMainFields) {
+      var mappedKey = (key.isNotNullOrEmpty && key != e.key ? "$key." : "") + e.key;
+      keysWithParent.add(mappedKey);
+    }
+
+    for (var e in subforms) {
+      keysWithParent.addAll(e.treeKeys);
+    }
+
+    return keysWithParent;
+  }
+
   FormModel._({
     required this.key,
     this.title,
     this.desc,
-    this.subforms,
+    List<FormModel>? subforms,
     required List<List<DynamicFormFieldState>> fields,
-  }) : _fields = fields {
+    bool? shouldShrink,
+  }) : _fields = fields, shouldShrink = shouldShrink ?? false {
+
     var duplicates = fields.expand((element) => element).map((e) => e.key).toList().getDuplicates();
     assert(duplicates.isEmpty, "As chaves $duplicates estão repetidas ao menos uma vez");
     assert(key == null || (subforms?.every((e) => e.key != null) ?? true),
     "The parent form key must be null while all subforms keys must be defined");
-
-    /*
-    _fields = [];
-    for (List<DynamicFormFieldState> outerList in fields) {
-      var mappedOuter = [];
-      for (DynamicFormFieldState field in outerList) {
-        mappedOuter.add(field.copyWith(parentKey: key));
-      }
-    }
-
-     */
+    this.subforms = subforms ?? [];
 
   }
 
@@ -73,12 +86,14 @@ class FormModel {
     String? desc,
     List<FormModel>? subforms,
     required List<List<DynamicFormFieldState>> fields,
+    bool? shouldShrink,
   }) : this._(
     key: key,
     fields: fields,
     title: title,
     desc: desc,
     subforms: subforms,
+    shouldShrink: shouldShrink
   );
 
   FormModel.singleField({
@@ -99,12 +114,14 @@ class FormModel {
     String? title,
     String? desc,
     List<FormModel>? subforms,
+    bool? shouldShrink,
     required List<DynamicFormFieldState> fields}) : this._(
     key: key,
     title: title,
     desc: desc,
     subforms: subforms,
     fields: fields.map((field) => [field]).toList(),
+    shouldShrink: shouldShrink,
   );
 
 
@@ -112,12 +129,14 @@ class FormModel {
     required String? key,
     String? title,
     String? desc,
+    bool? shouldShrink,
     required List<DynamicFormFieldState> fields}) : this._(
     key: key,
     title: title,
     desc: desc,
     subforms: [],
     fields: [fields],
+    shouldShrink: shouldShrink
   );
 
   FormModel copyWith({
@@ -126,12 +145,14 @@ class FormModel {
     String? desc,
     List<FormModel>? subforms,
     List<List<DynamicFormFieldState>>? fields,
+    bool? shouldShrink,
   }) => FormModel(
     key: key ?? this.key,
     fields: fields ?? fieldsMatrix,
     title: title ?? this.title,
     desc: desc ?? this.desc,
     subforms: subforms ?? this.subforms,
+    shouldShrink: shouldShrink ?? this.shouldShrink,
   );
 
   factory FormModel.fromJSON(Map<String, dynamic> data) {
@@ -203,6 +224,7 @@ class FormModel {
     }
   }
 
+  /*
   static bool patternMatching(FormModel v1, FormModel v2) {
 
     var sameKeys = {v1.expandedMainFields.map((e) => e.key)}
@@ -225,5 +247,7 @@ class FormModel {
     }
     return true;
   }
+
+   */
 
 }

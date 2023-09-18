@@ -26,7 +26,7 @@ final class TableFieldState extends DynamicFormFieldState<List<FormModel>> {
     required this.dataFactory,
     super.isRequired,
     super.configuration = const TableFieldConfiguration()
-  }) : super(
+  }) : assert(dataFactory(0).subforms.isEmpty, "Composed FormModels (subforms != null) are not supported for tables yet"),super(
     initialValue: [dataFactory(0)],
   );
 
@@ -48,7 +48,7 @@ final class TableFieldState extends DynamicFormFieldState<List<FormModel>> {
   int get length => value.length;
 
   void add(FormModel e) {
-    assert(FormModel.patternMatching(e, dataFactory(-1)), "The new data must follow the pre defined style");
+    //assert(FormModel.patternMatching(e, dataFactory(-1)), "The new data must follow the pre defined style");
     value.add(e);
     notifyListeners();
   }

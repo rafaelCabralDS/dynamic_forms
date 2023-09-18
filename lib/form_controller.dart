@@ -114,8 +114,6 @@ class MultipleFormController extends ChangeNotifier implements FormController {
   @override
   List<DynamicFormFieldState> get optionalFields =>  fields.where((element) => !element.isRequired).toList();
 
-
-
   @override
   bool validate({bool validateInBatch = true}) {
 
@@ -147,10 +145,35 @@ class MultipleFormController extends ChangeNotifier implements FormController {
     }
   }
 
+  void autofill(Map<String, dynamic> json) {
+
+    print(json);
+    print(toJSON());
+
+    /*
+    for (var formEntry in json.entries) {
+
+      if (formEntry.value is Map) {
+        var form = getFormByKey(formEntry.key);
+        form.autofill(formEntry.value);
+      } else {
+
+        var mainFields = forms.where((element) => element.key == null).map((e) => e.expandedMainFields).expand((e) => e).toList();
+        var field = findByKey(formEntry.key);
+        field.autofill(formEntry.value);
+      }
+
+    }
+
+     */
+
+  }
+
 
   FormModel add(FormModel form) {
     assert(form.key != null && form.key!.isNotEmpty, "Only root forms can have a null key");
     assert(!_forms.map((e) => e.key).contains(form.key), "There is already a form by the key ${form.key}");
+    //assert({fields.map((e) => e.key)}.difference({form.expandedMainFields.map((e) => e.key)}).isNotEmpty, "There is duplicates field keys");
     _forms.add(form);
     notifyListeners();
     return form;

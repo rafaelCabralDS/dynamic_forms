@@ -48,6 +48,7 @@ class DynamicFormThemeData with Diagnosticable {
   final SwitcherFormFieldBuilder switchFormFieldBuilder;
   final FileFormFieldBuilder fileFormFieldBuilder;
   final ExpandableFieldBuilder expandableFieldBuilder;
+  final TableFieldStyle tableFieldStyle;
 
   /// A map that overrides the default fields builders for specific field
   /// by the key value
@@ -78,6 +79,7 @@ class DynamicFormThemeData with Diagnosticable {
     this.formHeaderBuilder = defaultFormHeaderBuilder,
     this.subformHeaderBuilder = defaultSubformHeaderBuilder,
     this.expandableFieldBuilder = defaultExpandableFieldBuilder,
+    this.tableFieldStyle = const TableFieldStyle(),
   })  :
         textFieldBuilder = textFieldBuilder ?? baseTextFormFieldBuilder,
         cpfFieldBuilder = cpfFieldBuilder ?? baseTextFormFieldBuilder,
@@ -85,6 +87,76 @@ class DynamicFormThemeData with Diagnosticable {
         emailFieldBuilder = emailFieldBuilder ?? baseTextFormFieldBuilder,
         phoneFieldBuilder = phoneFieldBuilder ?? baseTextFormFieldBuilder,
         dateTextFormFieldBuilder = dateTextFormFieldBuilder ?? baseTextFormFieldBuilder;
+
+  DynamicFormThemeData copyWith({
+    DefaultTextFormFieldBuilder? baseTextFormFieldBuilder,
+    TextFormFieldBuilder? textFieldBuilder,
+    PasswordFormFieldBuilder? passwordFieldBuilder,
+    EmailFormFieldBuilder? emailFieldBuilder,
+    PhoneFormFieldBuilder? phoneFieldBuilder,
+    CpfFormFieldBuilder? cpfFieldBuilder,
+    CnpjFormFieldBuilder? cnpjFieldBuilder,
+    CheckboxFormFieldBuilder? checkboxFieldBuilder,
+    DropdownFormFieldBuilder? dropdownFieldBuilder,
+    DateTextFormFieldBuilder? dateTextFormFieldBuilder,
+    SwitcherFormFieldBuilder? switchFormFieldBuilder,
+    FileFormFieldBuilder? fileFormFieldBuilder,
+    ExpandableFieldBuilder? expandableFieldBuilder,
+    Map<String, FormFieldBuilder>? customFieldsBuilder,
+    double? runningSpacing,
+    double? verticalSpacing,
+    FormHeaderBuilder? formHeaderBuilder,
+    FormHeaderBuilder? subformHeaderBuilder,
+    TableFieldStyle? tableFieldStyle,
+  }) {
+    return DynamicFormThemeData(
+      baseTextFormFieldBuilder: baseTextFormFieldBuilder ?? this.baseTextFormFieldBuilder,
+      textFieldBuilder: textFieldBuilder ?? this.textFieldBuilder,
+      passwordFieldBuilder: passwordFieldBuilder ?? this.passwordFieldBuilder,
+      emailFieldBuilder: emailFieldBuilder ?? this.emailFieldBuilder,
+      phoneFieldBuilder: phoneFieldBuilder ?? this.phoneFieldBuilder,
+      cpfFieldBuilder: cpfFieldBuilder ?? this.cpfFieldBuilder,
+      cnpjFieldBuilder: cnpjFieldBuilder ?? this.cnpjFieldBuilder,
+      checkboxFieldBuilder: checkboxFieldBuilder ?? this.checkboxFieldBuilder,
+      dropdownFieldBuilder: dropdownFieldBuilder ?? this.dropdownFieldBuilder,
+      dateTextFormFieldBuilder: dateTextFormFieldBuilder ?? this.dateTextFormFieldBuilder,
+      switchFormFieldBuilder: switchFormFieldBuilder ?? this.switchFormFieldBuilder,
+      fileFormFieldBuilder: fileFormFieldBuilder ?? this.fileFormFieldBuilder,
+      expandableFieldBuilder: expandableFieldBuilder ?? this.expandableFieldBuilder,
+      customFieldsBuilder: customFieldsBuilder ?? this.customFieldsBuilder,
+      runningSpacing: runningSpacing ?? this.runningSpacing,
+      verticalSpacing: verticalSpacing ?? this.verticalSpacing,
+      formHeaderBuilder: formHeaderBuilder ?? this.formHeaderBuilder,
+      subformHeaderBuilder: subformHeaderBuilder ?? this.subformHeaderBuilder,
+      tableFieldStyle: tableFieldStyle ?? this.tableFieldStyle,
+    );
+  }
+
+  DynamicFormThemeData lerp({
+    DynamicFormThemeData? themeData,
+  }) {
+    return DynamicFormThemeData(
+      baseTextFormFieldBuilder: themeData?.baseTextFormFieldBuilder ?? baseTextFormFieldBuilder,
+      textFieldBuilder: themeData?.textFieldBuilder ?? textFieldBuilder,
+      passwordFieldBuilder: themeData?.passwordFieldBuilder ?? passwordFieldBuilder,
+      emailFieldBuilder: themeData?.emailFieldBuilder ?? emailFieldBuilder,
+      phoneFieldBuilder: themeData?.phoneFieldBuilder ?? phoneFieldBuilder,
+      cpfFieldBuilder: themeData?.cpfFieldBuilder ?? cpfFieldBuilder,
+      cnpjFieldBuilder: themeData?.cnpjFieldBuilder ?? cnpjFieldBuilder,
+      checkboxFieldBuilder: themeData?.checkboxFieldBuilder ?? checkboxFieldBuilder,
+      dropdownFieldBuilder: themeData?.dropdownFieldBuilder ?? dropdownFieldBuilder,
+      dateTextFormFieldBuilder: themeData?.dateTextFormFieldBuilder ?? dateTextFormFieldBuilder,
+      switchFormFieldBuilder: themeData?.switchFormFieldBuilder ?? switchFormFieldBuilder,
+      fileFormFieldBuilder: themeData?.fileFormFieldBuilder ?? fileFormFieldBuilder,
+      expandableFieldBuilder: themeData?.expandableFieldBuilder ?? expandableFieldBuilder,
+      customFieldsBuilder: themeData?.customFieldsBuilder ?? customFieldsBuilder,
+      runningSpacing: themeData?.runningSpacing ?? runningSpacing,
+      verticalSpacing: themeData?.verticalSpacing ?? verticalSpacing,
+      formHeaderBuilder: themeData?.formHeaderBuilder ?? formHeaderBuilder,
+      subformHeaderBuilder: themeData?.subformHeaderBuilder ?? subformHeaderBuilder,
+      tableFieldStyle: themeData?.tableFieldStyle ?? tableFieldStyle,
+    );
+  }
 
 
   static Widget defaultTextFormFieldBuilder(BaseTextFieldState state) => DefaultTextFieldBuilder(state: state);
@@ -128,7 +200,7 @@ class DynamicFormTheme extends InheritedTheme {
     context.findAncestorWidgetOfExactType<DynamicFormTheme>();
     return identical(this, ancestorTheme)
         ? child
-        : DynamicFormTheme(data: data, child: child);
+        : DynamicFormTheme(data: data.lerp(themeData: ancestorTheme?.data), child: child);
   }
 }
 
@@ -191,14 +263,16 @@ class DynamicForm extends StatelessWidget {
 
   const DynamicForm({super.key,
     required this.controller,
-    required this.style,
+    this.style,
   });
 
   final FormController controller;
-  final DynamicFormThemeData style;
+  final DynamicFormThemeData? style;
 
   @override
   Widget build(BuildContext context) {
+
+    var style = this.style ?? DynamicFormTheme.of(context);
 
     return DynamicFormTheme(
         data: style,

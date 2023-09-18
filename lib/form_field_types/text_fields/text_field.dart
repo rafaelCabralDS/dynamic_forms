@@ -20,7 +20,7 @@ final class TextFieldConfiguration extends BaseTextFormFieldConfiguration {
     isObscure: false,
   );
 
- factory TextFieldConfiguration.number({
+ factory TextFieldConfiguration.integer({
    String? label,
    int? flex,
    String? hint,
@@ -77,7 +77,7 @@ final class TextFieldState extends BaseTextFieldState {
       configuration: configuration
   );
 
-  factory TextFieldState.number({
+  factory TextFieldState.integer({
     required String key,
     String? initialValue,
     TextFieldConfiguration configuration = TextFieldConfiguration.factory,
@@ -88,7 +88,7 @@ final class TextFieldState extends BaseTextFieldState {
       initialValue: initialValue,
       isRequired: isRequired,
       enabled: enabled,
-      configuration: TextFieldConfiguration.number(
+      configuration: TextFieldConfiguration.integer(
         label: configuration.label,
         flex: configuration.flex,
         hint: configuration.hint,
