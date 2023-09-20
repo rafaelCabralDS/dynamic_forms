@@ -209,14 +209,14 @@ class FormModel {
     if (keyTree.length == 1) {
       return root._fields.expand((e) => e).singleWhere((element) => element.key == key) as DynamicFormFieldState<T>;
     }
-    var subform = subforms!.singleWhere((element) => element.key == keyTree[0]);
+    var subform = subforms.singleWhere((element) => element.key == keyTree[0]);
     return _findByKey(subform, keyTree.sublist(1).join("."));
   }
 
 
   void autofill(Map<String, dynamic> json) {
 
-    for (final entry in json.entries.where((element) => element.value != null)) {
+    for (final entry in json.flattenMap().entries.where((element) => element.value != null)) {
       try {
         var field = findByKey(entry.key);
         field.autofill(entry.value);

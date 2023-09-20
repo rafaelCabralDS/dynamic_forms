@@ -136,3 +136,25 @@ class DecimalTextInputFormatter extends TextInputFormatter {
     return newValue;
   }
 }
+
+
+extension MapExtension on Map<String,dynamic> {
+  Map<String, dynamic> flattenMap({String separator = '.'}) {
+    Map<String, dynamic> result = {};
+
+    void flatten(Map<String, dynamic> map, String currentKey) {
+      map.forEach((key, value) {
+        final newKey = currentKey.isEmpty ? key : '$currentKey$separator$key';
+        if (value is Map<String, dynamic>) {
+          flatten(value, newKey);
+        } else {
+          result[newKey] = value;
+        }
+      });
+    }
+
+    flatten(this, '');
+
+    return result;
+  }
+}
