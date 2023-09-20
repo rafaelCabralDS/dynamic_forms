@@ -1,6 +1,5 @@
 
 import 'package:dynamic_forms/dynamic_forms.dart';
-import 'package:dynamic_forms/field_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

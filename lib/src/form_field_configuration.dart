@@ -1,16 +1,13 @@
 
-import 'package:dynamic_forms/form_field_types/checkbox_field.dart';
-import 'package:dynamic_forms/form_field_types/dropdown_field.dart';
-import 'package:dynamic_forms/form_field_types/expandable_field.dart';
-import 'package:dynamic_forms/form_field_types/file_field.dart';
-import 'package:dynamic_forms/form_field_types/switcher_field.dart';
-import 'package:dynamic_forms/form_field_types/table_field/table_field_state.dart';
-import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
+import 'package:dynamic_forms/src/form_field_types/checkbox_field.dart';
+import 'package:dynamic_forms/src/form_field_types/dropdown_field.dart';
+import 'package:dynamic_forms/src/form_field_types/expandable_field.dart';
+import 'package:dynamic_forms/src/form_field_types/file_field.dart';
+import 'package:dynamic_forms/src/form_field_types/switcher_field.dart';
+import 'package:dynamic_forms/src/form_field_types/table_field/table_field_state.dart';
+import 'package:dynamic_forms/src/form_field_types/text_fields/text_field_base.dart';
 
-export 'form_field_types/dropdown_field.dart';
-export 'form_field_types/switcher_field.dart';
-export 'form_field_types/text_fields/text_field_base.dart';
-export 'form_field_types/checkbox_field.dart';
+
 
 enum FormFieldType {
   textField("text_field"),

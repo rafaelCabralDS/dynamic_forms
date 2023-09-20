@@ -1,4 +1,4 @@
-import 'package:dynamic_forms/form_field_types/text_fields/date_field.dart';
+import 'package:dynamic_forms/src/form_field_types/text_fields/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

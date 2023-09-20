@@ -1,8 +1,5 @@
-
-
 import 'dart:math' as math;
-
-import 'package:dynamic_forms/form_field_types/text_fields/text_field_base.dart';
+import 'package:dynamic_forms/src/field_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -79,6 +76,7 @@ extension StringExtension on String {
 }
 
 extension TextInputTypeExtension on String? {
+
 
   TextInputFormatter? get asFormatter {
 

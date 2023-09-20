@@ -1,9 +1,8 @@
 
 
-import 'package:dynamic_forms/field_state.dart';
-import 'package:dynamic_forms/utils.dart';
+import 'package:dynamic_forms/src/field_state.dart';
+import 'package:dynamic_forms/src/utils.dart';
 
-import 'package:collection/collection.dart';
 class FormModel {
 
   static const String FORM_KEY = "form"; // Field name
@@ -185,6 +184,13 @@ class FormModel {
     }
     return data;
   }
+
+  @override
+  String toString() {
+    return expandedMainFields
+        .map((e) => "${e.configuration.label ?? e.key} : ${e.value.toString()}").join("\n");
+  }
+
 
   DynamicFormFieldState<T> findByKey<T>(String key) {
 
