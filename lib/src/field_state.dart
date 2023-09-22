@@ -29,6 +29,7 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
   DynamicFormFieldState({
     required this.key,
     required this.configuration,
+    this.jsonEntryMapper,
     T? initialValue,
     bool? isRequired,
     bool? enabled,
@@ -41,6 +42,7 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
 
   final String key;
   final FormFieldConfiguration configuration;
+  final dynamic Function(T?)? jsonEntryMapper;
 
   /// An required field will be validated (Default is true)
   final bool isRequired;
@@ -115,7 +117,7 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
   /// How the value will be parsed as a json entry
   /// Useful when you need to override the output data type, example:
   /// transform a [DateTime] value into a [Timestamp] to firestore
-  MapEntry<String, dynamic> asJsonEntry() => MapEntry(key, value);
+  MapEntry<String, dynamic> asJsonEntry() => MapEntry(key, jsonEntryMapper != null ? jsonEntryMapper!(value) : value);
 
 
   /// Translates a map in the format

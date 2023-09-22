@@ -6,23 +6,29 @@ import 'package:flutter/cupertino.dart';
 import 'utils.dart';
 export 'form_model.dart';
 
-abstract interface class FormController {
+// An mixin class can be extended or used as with
+abstract mixin class FormController {
 
   List<DynamicFormFieldState> get fields;
   List<DynamicFormFieldState> get requiredFields;
   List<DynamicFormFieldState> get optionalFields;
 
+  bool get isValid {
+    bool requiredAreReady = requiredFields.every((element) => element.isValid);
+    bool optionalFieldsAreReady = optionalFields.where((element) => element.value != null).every((element) => element.isValid);
+    return requiredAreReady && optionalFieldsAreReady;
+  }
 
   bool validate({bool validateInBatch = true});
 
   void clearErrors();
   Map<String, dynamic> toJSON();
-  DynamicFormFieldState findByKey(String key);
+  T findByKey<T extends DynamicFormFieldState>(String key);
   void clear();
 
 }
 
-class SingleFormController implements FormController {
+class SingleFormController extends FormController {
 
   FormModel form;
   SingleFormController({required this.form});
@@ -41,7 +47,6 @@ class SingleFormController implements FormController {
   @override
   List<DynamicFormFieldState> get optionalFields =>  fields.where((element) => !element.isRequired).toList();
 
-
   @override
   bool validate({bool validateInBatch = true}) {
 
@@ -74,9 +79,9 @@ class SingleFormController implements FormController {
   }
 
   @override
-  DynamicFormFieldState findByKey(String key) {
+  T findByKey<T extends DynamicFormFieldState>(String key) {
     try {
-      return fields.singleWhere((element) => element.key == key);
+      return fields.singleWhere((element) => element.key == key) as T;
     } catch (_) {
       throw Exception("There is no $key value on the current controller");
     }
@@ -95,7 +100,7 @@ class SingleFormController implements FormController {
 
 }
 
-class MultipleFormController extends ChangeNotifier implements FormController {
+class MultipleFormController extends ChangeNotifier with FormController {
 
   MultipleFormController({
       required List<FormModel> forms,
@@ -114,9 +119,10 @@ class MultipleFormController extends ChangeNotifier implements FormController {
   @override
   List<DynamicFormFieldState> get optionalFields =>  fields.where((element) => !element.isRequired).toList();
 
+
+
   @override
   bool validate({bool validateInBatch = true}) {
-
     if (validateInBatch) {
       for (var e in requiredFields) {
         e.validate();
@@ -124,10 +130,12 @@ class MultipleFormController extends ChangeNotifier implements FormController {
       for (var e in optionalFields.where((e) => e.value != null)) {
         e.validate();
       }
+      return isValid;
     }
 
-    bool requiredAreReady = requiredFields.every((element) => element.isValid);
-    bool optionalFieldsAreReady = optionalFields.where((element) => element.value != null).every((element) => element.isValid);
+    // The validation stops on the first non valid field
+    bool requiredAreReady = requiredFields.every((element) => element.validate());
+    bool optionalFieldsAreReady = optionalFields.where((element) => element.value != null).every((element) => element.validate());
     return requiredAreReady && optionalFieldsAreReady;
   }
 
@@ -144,34 +152,6 @@ class MultipleFormController extends ChangeNotifier implements FormController {
       e.reset();
     }
   }
-
-  /*
-  void autofill(Map<String, dynamic> json) {
-
-    print(json);
-    print(toJSON());
-
-    /*
-    for (var formEntry in json.entries) {
-
-      if (formEntry.value is Map) {
-        var form = getFormByKey(formEntry.key);
-        form.autofill(formEntry.value);
-      } else {
-
-        var mainFields = forms.where((element) => element.key == null).map((e) => e.expandedMainFields).expand((e) => e).toList();
-        var field = findByKey(formEntry.key);
-        field.autofill(formEntry.value);
-      }
-
-    }
-
-     */
-
-  }
-
-   */
-
 
   void add(FormModel form) {
     assert(form.key != null && form.key!.isNotEmpty, "Only root forms can have a null key");
@@ -238,28 +218,33 @@ class MultipleFormController extends ChangeNotifier implements FormController {
   }
 
   @override
-  DynamicFormFieldState findByKey(String fieldKey) {
+  T findByKey<T extends DynamicFormFieldState>(String fieldKey) {
 
     try {
       var keys = fieldKey.split(".");
       var form = getFormByKey(keys[0]);
 
-      return form.isSingleFormField
+      return (form.isSingleFormField
           ? form.allFields.first
-          : form.findByKey(keys.sublist(1).join("."));
+          : form.findByKey(keys.sublist(1).join("."))) as T;
 
     } catch (_) {
       throw Exception("There is no $fieldKey field in this controller");
     }
   }
 
-
   @override
   Map<String, dynamic> toJSON() {
 
     var data = <String, dynamic>{};
     for (var form in _forms) {
-      data[form.key!] = form.isSingleFormField ? form.allFields[0].asJsonEntry().value : form.toJSON();
+
+      if (form.shouldShrink) {
+        data.addAll(form.toJSON());
+      } else {
+        data[form.key!] = form.isSingleFormField ? form.allFields[0].asJsonEntry().value : form.toJSON();
+      }
+
     }
     return data;
   }

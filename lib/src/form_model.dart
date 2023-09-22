@@ -178,7 +178,8 @@ class FormModel {
       // [fieldKey: {fieldKey: fieldValue}] to [fieldKey: fieldValue]
       var isSingleField = fields.length == 1 && fields[0].key == subform.key;
 
-      data[subform.key!] = isSingleField
+
+      data[subform.key!] = (isSingleField)
           ? fields.first.asJsonEntry().value
           : subform.toJSON();
     }
@@ -192,22 +193,22 @@ class FormModel {
   }
 
 
-  DynamicFormFieldState<T> findByKey<T>(String key) {
+  T findByKey<T extends DynamicFormFieldState>(String key) {
 
     try {
       return _findByKey(this, key);
     } catch (_) {
-      throw Exception("There is no $key value on the current controller");
+      throw Exception("There is no $key value on the current form");
     }
   }
 
   /// Internal implementation for the [findByKey] method
-  DynamicFormFieldState<T> _findByKey<T>(FormModel root, String key) {
+  T _findByKey<T extends DynamicFormFieldState>(FormModel root, String key) {
 
     var keyTree = key.split(".");
 
     if (keyTree.length == 1) {
-      return root._fields.expand((e) => e).singleWhere((element) => element.key == key) as DynamicFormFieldState<T>;
+      return root._fields.expand((e) => e).singleWhere((element) => element.key == key) as T;
     }
     var subform = subforms.singleWhere((element) => element.key == keyTree[0]);
     return _findByKey(subform, keyTree.sublist(1).join("."));

@@ -2,7 +2,7 @@
 import 'package:dynamic_forms/src/field_state.dart';
 import 'package:dynamic_forms/src/form_controller.dart';
 import 'package:dynamic_forms/src/form_field_configuration.dart';
-import 'package:dynamic_forms/src/form_field_types/table_field/table_components.dart';
+import 'package:dynamic_forms/visual.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
@@ -66,26 +66,41 @@ class TableFieldGridSource extends DataGridSource {
     var fieldConfiguration = field.configuration;
 
 
-    final String displayText = dataGridRow
+    /*
+    var field = dataGridRow
         .getCells()
-        .firstWhereOrNull((DataGridCell dataGridCell) => dataGridCell.columnName == column.columnName)?.value?.toString() ?? '';
+        .firstWhereOrNull((DataGridCell dataGridCell) => dataGridCell.columnName == column.columnName)
+        ?.value;
+
+     */
 
 
     if (field.configuration.formType == FormFieldType.textField) {
       fieldConfiguration = fieldConfiguration as BaseTextFormFieldConfiguration;
+      //fieldConfiguration = fieldConfiguration as TextFieldConfiguration;
 
-      return Container(
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          autofocus: true,
-          onTapOutside: (_) => submitCell(),
-          onChanged: (String value) => _inputValue = value,
-          inputFormatters: fieldConfiguration.formatter != null ? [fieldConfiguration.formatter!] : null,
-          decoration: InputDecoration(
-            hintText: displayText,
 
-          ),
-        ),
+      return Builder(
+        builder: (context) {
+          var style = DynamicFormTheme.of(context).tableFieldStyle;
+          return TextField(
+            autofocus: true,
+            onTapOutside: (_) => submitCell(),
+            onChanged: (String value) => _inputValue = value,
+            textAlign: TextAlign.center,
+            textAlignVertical: TextAlignVertical.center,
+            //inputFormatters: fieldConfiguration.formatter != null ? [fieldConfiguration.formatter!] : null,
+            style: style.filledCellStyle,
+            decoration: InputDecoration(
+              hintText: field.configuration.label ?? field.key,
+              labelText: field.configuration.label ?? field.key,
+              border: const OutlineInputBorder(borderSide: BorderSide(width: 2, )),
+              hintStyle: style.emptyCellTextStyle,
+              labelStyle: style.emptyCellTextStyle,
+              floatingLabelBehavior: FloatingLabelBehavior.never
+            ),
+          );
+        }
       );
     }
 

@@ -39,6 +39,7 @@ class TableFieldStyle {
 
   final Color? headerColor;
   final Widget Function()? footerBuilder;
+  final double? footerHeight;
 
   const TableFieldStyle({
     this.filledCellStyle,
@@ -46,6 +47,7 @@ class TableFieldStyle {
     this.headerColor,
     this.headerTextStyle,
     this.footerBuilder,
+    this.footerHeight,
   });
 
 
@@ -79,7 +81,7 @@ class _TableFieldBuilderState extends State<TableFieldBuilder> {
     builder: (context) {
       return InkWell(
           onTap: () => widget.state.addFactory(),
-          child: Container(
+          child: DynamicFormTheme.of(context).tableFieldStyle.footerBuilder?.call() ?? Container(
             color: Colors.grey[100],
             child: Center(child: Text("Adicionar+", style: Theme.of(context).textTheme.labelLarge)),
           )
@@ -111,7 +113,8 @@ class _TableFieldBuilderState extends State<TableFieldBuilder> {
         selectionMode: SelectionMode.single,
         navigationMode: GridNavigationMode.cell,
         footer: _buildFooter(),
-        footerFrozenRowsCount: 1,
+        footerHeight: style.tableFieldStyle.footerHeight ?? 49.9,
+
         allowEditing: true,
         //headerGridLinesVisibility:GridLinesVisibility.vertical,
 

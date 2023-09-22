@@ -39,6 +39,7 @@ final class DropdownFieldState<T extends Object> extends DynamicFormFieldState<T
 
   final List<T> _options;
 
+
   DropdownFieldState({
     required super.key,
     required List<T> options,
@@ -46,6 +47,7 @@ final class DropdownFieldState<T extends Object> extends DynamicFormFieldState<T
     super.enabled,
     DropdownFieldConfiguration configuration =  DropdownFieldConfiguration.factory,
     super.isRequired,
+    super.jsonEntryMapper,
   }) : _options = options, super(configuration: configuration);
 
   List<T> get options => _options;

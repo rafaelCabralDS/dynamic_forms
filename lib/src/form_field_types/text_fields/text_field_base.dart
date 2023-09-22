@@ -90,6 +90,7 @@ base class BaseTextFormFieldConfiguration extends FormFieldConfiguration {
 }
 
 
+/// A text field that will return the data type [T] when parsing
 abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
 
   BaseTextFieldState({
@@ -98,6 +99,7 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
     super.isRequired,
     required BaseTextFormFieldConfiguration configuration,
     bool hidden = false,
+    super.jsonEntryMapper,
     super.enabled,
   }) : _hidden = hidden, super(configuration: configuration);
 
@@ -108,7 +110,6 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
     _hidden = isHidden;
     notifyListeners();
   }
-
 
   @override
   BaseTextFormFieldConfiguration get configuration => super.configuration as BaseTextFormFieldConfiguration;
@@ -131,7 +132,6 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
     }
 
   }
-
 
   @override
   bool validate([String invalidMsg = "Campo inválido"]) {

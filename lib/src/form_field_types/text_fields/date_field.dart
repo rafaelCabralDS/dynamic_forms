@@ -129,6 +129,10 @@ final class DateTextFieldState extends BaseTextFieldState {
   @override
   DateTextFieldConfiguration get configuration => super.configuration as DateTextFieldConfiguration;
 
+  @override
+  MapEntry<String, DateTime?> asJsonEntry() {
+    return MapEntry(key, value?.parseAsBrDate());
+  }
 
   @override
   bool validator(String? v) {

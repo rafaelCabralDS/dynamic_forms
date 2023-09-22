@@ -44,6 +44,7 @@ final class PhoneFieldState extends BaseTextFieldState {
     PhoneFieldConfiguration? configuration,
     super.isRequired,
     super.enabled,
+    super.jsonEntryMapper,
   }) : super(configuration: configuration ?? PhoneFieldConfiguration.factory);
 
   factory PhoneFieldState.fromJSON(Map<String, dynamic> json) => PhoneFieldState(

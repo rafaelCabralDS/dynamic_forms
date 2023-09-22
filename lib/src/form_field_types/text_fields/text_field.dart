@@ -73,6 +73,7 @@ final class TextFieldState extends BaseTextFieldState {
     TextFieldConfiguration configuration = TextFieldConfiguration.factory,
     super.isRequired,
     super.enabled,
+    super.jsonEntryMapper,
   }) : super(
       configuration: configuration
   );
@@ -129,6 +130,76 @@ final class TextFieldState extends BaseTextFieldState {
 
   @override
   bool validator(String? v) => v != null && v.isNotEmpty;
+
+}
+
+final class TextNumberFieldState extends BaseTextFieldState {
+
+  TextNumberFieldState._({
+    required super.key,
+    super.initialValue,
+    TextFieldConfiguration configuration = TextFieldConfiguration.factory,
+    super.isRequired,
+    super.enabled,
+  }) : super(
+      configuration: configuration
+  );
+
+  factory TextNumberFieldState.integer({
+    required String key,
+    String? initialValue,
+    TextFieldConfiguration configuration = TextFieldConfiguration.factory,
+    bool? isRequired,
+    bool? enabled,
+  }) => TextNumberFieldState._(
+      key: key,
+      initialValue: initialValue,
+      isRequired: isRequired,
+      enabled: enabled,
+      configuration: TextFieldConfiguration.integer(
+        label: configuration.label,
+        flex: configuration.flex,
+        hint: configuration.hint,
+        //regexFormatterPattern: configuration.,
+        suffixIcon: configuration.suffixIcon,
+      )
+  );
+
+  factory TextNumberFieldState.decimal({
+    required String key,
+    String? initialValue,
+    TextFieldConfiguration configuration = TextFieldConfiguration.factory,
+    bool? isRequired,
+    bool? enabled,
+  }) => TextNumberFieldState._(
+      key: key,
+      enabled: enabled,
+      initialValue: initialValue,
+      isRequired: isRequired,
+      configuration: TextFieldConfiguration.decimal(
+        label: configuration.label,
+        flex: configuration.flex,
+        hint: configuration.hint,
+        //regexFormatterPattern: configuration.,
+        suffixIcon: configuration.suffixIcon,
+      )
+  );
+
+
+  factory TextNumberFieldState.fromJSON(Map<String, dynamic> json) => TextNumberFieldState._(
+    key: json[DynamicFormFieldState.KEY_KEY],
+    initialValue: json[DynamicFormFieldState.KEY_INITIAL_VALUE],
+    isRequired: json[DynamicFormFieldState.KEY_REQUIRED] ?? true,
+    enabled: json[DynamicFormFieldState.KEY_ENABLED],
+    configuration: TextFieldConfiguration.fromJSON(json),
+  );
+
+
+  @override
+  bool validator(String? v) => v != null && v.isNotEmpty;
+
+  @override
+  MapEntry<String, num?> asJsonEntry() => MapEntry(key, value != null ? num.tryParse(value!) : null);
 
 
 }

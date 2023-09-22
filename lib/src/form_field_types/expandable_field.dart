@@ -39,6 +39,7 @@ abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<Li
     super.configuration = const ExpandableFieldConfiguration(),
     super.isRequired,
     required this.dataFactory,
+    super.jsonEntryMapper,
   }) : super(
     initialValue: [dataFactory(0)],
   );
@@ -98,6 +99,7 @@ final class ExpandableFieldState<E> extends ExpandableBaseFieldState<DynamicForm
     required super.dataFactory,
     super.configuration = const ExpandableFieldConfiguration(),
     super.isRequired,
+    super.jsonEntryMapper,
   }) : super();
 
   factory ExpandableFieldState.fromJSON(Map<String, dynamic> json) => throw UnimplementedError();
@@ -128,14 +130,15 @@ final class ExpandableFormFieldState extends ExpandableBaseFieldState<FormModel>
     required super.key,
     required super.dataFactory,
     super.isRequired,
-    super.configuration = const ExpandableFieldConfiguration()
+    super.configuration = const ExpandableFieldConfiguration(),
+    super.jsonEntryMapper,
   });
 
 
   @override
   bool validator(List<FormModel>? v) {
     assert(v != null);
-    return v?.expand((element) => element.allFields).every((element) => element.isValid) ?? false;
+    return v!.expand((element) => element.allFields).every((element) => element.isValid);
   }
 
   @override
