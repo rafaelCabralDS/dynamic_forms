@@ -135,7 +135,7 @@ final class DateTextFieldState extends BaseTextFieldState {
     if (v == null) return false;
     DateTime date;
     try {
-      date = DateTime.parse(v.replaceAll("/", "-"));
+      date = v.parseAsBrDate();
     } catch (e) {
       return false;
     }
@@ -144,6 +144,7 @@ final class DateTextFieldState extends BaseTextFieldState {
     return true;
   }
 
+  /*
   @override
   bool validate([String invalidMsg = "Campo inválido"]) {
 
@@ -160,7 +161,7 @@ final class DateTextFieldState extends BaseTextFieldState {
     /// Check for range errors
     if (value?.length == 8 && error != null) {
 
-      var date = DateTime.parse(value!.replaceAll("/", "-"));
+      var date = value!.parseAsBrDate();
       var tooEarlyError = "Data deve ser posterior a $date";
       var tooLateError = "Data deve ser inferior a $date";
 
@@ -176,11 +177,13 @@ final class DateTextFieldState extends BaseTextFieldState {
     return true;
   }
 
+   */
+
 }
 
 ////////////////////////////////////////////////// UTILS ////////////////////////////////////////////////
 
-/*
+
 extension DateTimeParsing on String {
   DateTime parseAsBrDate() {
     final datePattern1 = RegExp(r'(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})');
@@ -203,7 +206,6 @@ extension DateTimeParsing on String {
   }
 }
 
- */
 
 class DateTextFormatter extends TextInputFormatter {
   static const _maxChars = 8;
@@ -216,6 +218,7 @@ class DateTextFormatter extends TextInputFormatter {
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
     var text = _format(newValue.text, '/');
+
     return newValue.copyWith(text: text, selection: updateCursorPosition(text));
   }
 

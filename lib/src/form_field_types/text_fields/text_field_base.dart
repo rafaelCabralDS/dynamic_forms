@@ -132,6 +132,7 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
 
   }
 
+
   @override
   bool validate([String invalidMsg = "Campo inválido"]) {
     if (!isValid && error == null) {
@@ -142,6 +143,8 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
     }
     return isValid;
   }
+
+
 
 
 }

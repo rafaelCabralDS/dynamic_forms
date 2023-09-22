@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 // Import the extension and function you want to test
 
-/*
+
 void main() {
   group('DateTimeParsing extension', () {
     test('Parsing "day/month/year" format', () {
@@ -37,6 +37,7 @@ void main() {
     });
   });
 
+  /*
   group('DateTextFormatter', () {
     late final DateTextFormatter formatter;
 
@@ -74,8 +75,26 @@ void main() {
       expect(formattedDate3.selection, TextSelection.collapsed(offset: 0));
     });
   });
+
+   */
+
+  test("date validator", () {
+
+
+    final DateTextFieldState state = DateTextFieldState(key: "key");
+    state.value = "22/11/2000";
+
+    var parsedDate = state.value!.parseAsBrDate();
+
+    expect(parsedDate.isAtSameMomentAs(DateTime(2000, 11, 22)), true);
+
+    expect(state.validate(), true);
+
+  });
+
+
 }
 
- */
+
 
 
