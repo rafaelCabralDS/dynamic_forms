@@ -99,4 +99,16 @@ void main() {
 
   });
 
+  test("listeners resources management test", () {
+
+    final expanded = ExpandableFieldState(key: "key", dataFactory: (i) => TextFieldState(key: i.toString()));
+
+    expect(expanded.value.first.hasListeners, true);
+    //expanded.killListener(expanded.value.first);
+    expect(expanded.value.first.hasListeners, false);
+
+
+
+  });
+
 }

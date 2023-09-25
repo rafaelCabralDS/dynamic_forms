@@ -58,8 +58,10 @@ abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<Li
   /// This is the base model field that will be built at first
   final T Function(int index) dataFactory;
 
-  /// Make sure that children changes are propagated to the parent
+  /// Make sure that children changes are propagated to the parent and manage memory (DO NOT CHANGE)
+  void _listener() => () => notifyListeners();
   void _internalListener(T item);
+  void _killListener(T item);
 
   void add(T e) {
     if (length == configuration.maxFields) return;
@@ -78,12 +80,14 @@ abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<Li
 
   void removeLast() {
     if (length == configuration.minFields) return;
+    _killListener(value.last);
     value.removeLast();
     notifyListeners();
   }
 
   void removeAt(int index) {
     if (length == configuration.minFields) return;
+    _killListener(value[index]);
     value.removeAt(index);
     notifyListeners();
   }
@@ -111,9 +115,16 @@ final class ExpandableFieldState<E> extends ExpandableBaseFieldState<DynamicForm
   }) : super();
 
   factory ExpandableFieldState.fromJSON(Map<String, dynamic> json) => throw UnimplementedError();
-  
+
+
+
   @override
-  void _internalListener(DynamicFormFieldState item) => item.addListener(() => notifyListeners());
+  void _internalListener(DynamicFormFieldState item) => item.addListener(_listener);
+
+  @override
+  void _killListener(DynamicFormFieldState<E> item) {
+    item.removeListener(_listener);
+  }
 
   
   @override
@@ -147,10 +158,18 @@ final class ExpandableFormFieldState extends ExpandableBaseFieldState<FormModel>
   });
 
 
+
+  @override
+  void _killListener(FormModel item) {
+    for (var field in item.allFields) {
+      field.removeListener(_listener);
+    }
+  }
+
   @override
   void _internalListener(FormModel item) {
     for (var field in item.allFields) {
-      field.addListener(() => notifyListeners());
+      field.addListener(_listener);
     }
   }
 
