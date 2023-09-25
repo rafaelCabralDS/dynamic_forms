@@ -42,7 +42,9 @@ abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<Li
     super.jsonEntryMapper,
   }) : super(
     initialValue: [dataFactory(0)],
-  );
+  ) {
+    _internalListener(value.first);
+  }
 
 
   @override
@@ -56,16 +58,21 @@ abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<Li
   /// This is the base model field that will be built at first
   final T Function(int index) dataFactory;
 
+  /// Make sure that children changes are propagated to the parent
+  void _internalListener(T item);
 
   void add(T e) {
     if (length == configuration.maxFields) return;
     value.add(e);
+    _internalListener(e);
     notifyListeners();
   }
 
   void addFactory() {
     if (length == configuration.maxFields) return;
-    value.add(dataFactory(length));
+    var e = dataFactory(length);
+    value.add(e);
+    _internalListener(e);
     notifyListeners();
   }
 
@@ -84,6 +91,7 @@ abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<Li
   void insert(int i, T e) {
     if (length == configuration.maxFields) return;
     value.insert(i, e);
+    _internalListener(e);
     notifyListeners();
   }
 
@@ -103,7 +111,11 @@ final class ExpandableFieldState<E> extends ExpandableBaseFieldState<DynamicForm
   }) : super();
 
   factory ExpandableFieldState.fromJSON(Map<String, dynamic> json) => throw UnimplementedError();
+  
+  @override
+  void _internalListener(DynamicFormFieldState item) => item.addListener(() => notifyListeners());
 
+  
   @override
   bool validator(List<DynamicFormFieldState>? v) {
     return v?.every((element) => element.isValid) ?? false;
@@ -133,6 +145,15 @@ final class ExpandableFormFieldState extends ExpandableBaseFieldState<FormModel>
     super.configuration = const ExpandableFieldConfiguration(),
     super.jsonEntryMapper,
   });
+
+
+  @override
+  void _internalListener(FormModel item) {
+    for (var field in item.allFields) {
+      field.addListener(() => notifyListeners());
+    }
+  }
+
 
 
   @override
@@ -176,6 +197,7 @@ class BuildExpandableField extends StatelessWidget {
   Widget build(BuildContext context) {
 
     var style = DynamicFormTheme.of(context);
+
 
     return Column(
       children: [

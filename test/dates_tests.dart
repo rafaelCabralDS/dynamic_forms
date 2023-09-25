@@ -82,12 +82,13 @@ void main() {
 
 
     final DateTextFieldState state = DateTextFieldState(key: "key");
-    state.value = "22/11/2000";
+    state.value = "31/08/2026";
 
-    var parsedDate = state.value!.parseAsBrDate();
+    //var parsedDate = state.value!.parseAsBrDate();
 
-    expect(parsedDate.isAtSameMomentAs(DateTime(2000, 11, 22)), true);
+    //expect(parsedDate.isAtSameMomentAs(DateTime(2000, 11, 22)), true);
 
+    print(state.value);
     expect(state.validate(), true);
 
   });

@@ -93,6 +93,14 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
 
   bool get isFull => value.length == configuration.limit;
 
+  /*
+  @override
+  MapEntry<String, dynamic> asJsonEntry() {
+    return MapEntry(key, null);
+  }
+
+   */
+
   @override
   bool validator(List<PlatformFile>? v) => v != null;
 
