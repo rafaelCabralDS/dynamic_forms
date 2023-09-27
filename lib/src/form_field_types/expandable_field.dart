@@ -1,7 +1,6 @@
-import 'package:dynamic_forms/src/components/dynamic_form_theme.dart';
+
 import 'package:dynamic_forms/dynamic_forms.dart';
-import 'package:dynamic_forms/src/components/form_builder.dart';
-import 'package:dynamic_forms/src/field_state.dart';
+
 import 'package:dynamic_forms/src/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -40,6 +39,7 @@ abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<Li
     super.isRequired,
     required this.dataFactory,
     super.jsonEntryMapper,
+    super.callback,
   }) : super(
     initialValue: [dataFactory(0)],
   ) {
@@ -59,9 +59,11 @@ abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<Li
   final T Function(int index) dataFactory;
 
   /// Make sure that children changes are propagated to the parent and manage memory (DO NOT CHANGE)
-  void _listener() => () => notifyListeners();
   void _internalListener(T item);
   void _killListener(T item);
+  void _listener() {
+    notifyListeners();
+  }
 
   void add(T e) {
     if (length == configuration.maxFields) return;
@@ -115,7 +117,6 @@ final class ExpandableFieldState<E> extends ExpandableBaseFieldState<DynamicForm
   }) : super();
 
   factory ExpandableFieldState.fromJSON(Map<String, dynamic> json) => throw UnimplementedError();
-
 
 
   @override

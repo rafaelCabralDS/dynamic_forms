@@ -114,6 +114,7 @@ final class DateTextFieldState extends BaseTextFieldState {
     DateTextFieldConfiguration? configuration,
     super.isRequired,
     super.enabled,
+    super.callback,
   }) : super(
 
       initialValue: initialValue != null ? "${initialValue.day}${initialValue.month}/${initialValue.year}" : null,

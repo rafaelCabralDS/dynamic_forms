@@ -12,6 +12,7 @@ final class CheckboxFieldConfiguration extends FormFieldConfiguration {
     super.label,
     super.flex,
     this.description,
+
   }) : super(formType: FormFieldType.checkbox);
 
   static const factory = CheckboxFieldConfiguration();
@@ -32,6 +33,7 @@ final class CheckboxFieldState extends DynamicFormFieldState<bool> {
     required super.key,
     super.initialValue = false,
     super.enabled,
+    super.callback,
    CheckboxFieldConfiguration configuration = CheckboxFieldConfiguration.factory,
     super.isRequired,
   }) : super(configuration: configuration);

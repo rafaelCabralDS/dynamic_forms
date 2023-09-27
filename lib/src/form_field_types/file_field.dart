@@ -78,6 +78,7 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
     required super.key,
     required super.configuration,
     super.isRequired,
+    super.callback,
   }) : super(
     initialValue: []
   );

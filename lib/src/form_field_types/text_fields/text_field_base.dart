@@ -101,6 +101,7 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
     bool hidden = false,
     super.jsonEntryMapper,
     super.enabled,
+    super.callback,
   }) : _hidden = hidden, super(configuration: configuration);
 
   // States that can change this parameter, must implement the setters

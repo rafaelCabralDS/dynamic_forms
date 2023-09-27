@@ -48,11 +48,12 @@ final class DropdownFieldState<T extends Object> extends DynamicFormFieldState<T
     DropdownFieldConfiguration configuration =  DropdownFieldConfiguration.factory,
     super.isRequired,
     super.jsonEntryMapper,
+    super.callback,
   }) : _options = options, super(configuration: configuration);
 
   List<T> get options => _options;
   set options(List<T> options) {
-    if (({...options}.difference({...this.options}).isNotEmpty)) {
+    if (options != this.options) {
       value = null;
       _options..clear()..addAll(options);
       notifyListeners();
@@ -101,38 +102,58 @@ class DefaultDropdownFieldBuilder<T extends Object> extends StatefulWidget {
 class _DefaultDropdownFieldBuilderState<T extends Object> extends State<DefaultDropdownFieldBuilder<T>> {
 
   late final TextEditingController _controller;
+  late final List<T> options;
+  late Key _key;
+
+  void optionsListener() {
+
+    if (options != widget.state.options) {
+      setState(() {
+        options..clear()..addAll(widget.state.options);
+        _controller.clear();
+        _key = UniqueKey();
+      });
+    }
+
+  }
 
   @override
   void initState() {
     _controller = TextEditingController(text: widget.state.value?.toString());
+    options = List.from(widget.state.options);
+    widget.state.addListener(optionsListener);
+    _key = UniqueKey();
     super.initState();
   }
 
+
   @override
   void dispose() {
+    widget.state.removeListener(optionsListener);
     _controller.dispose();
     super.dispose();
   }
 
+  DropdownFieldConfiguration get config => widget.state.configuration;
+
   @override
   Widget build(BuildContext context) {
-
-
 
     return LayoutBuilder(
       builder: (context, dimens) {
 
         return DropdownMenu(
+            key: _key,
             controller: _controller,
             width: dimens.maxWidth,
             onSelected: (value) => widget.state.value = value,
-            hintText: widget.state.configuration.hint,
+            hintText: config.hint ?? config.label,
             initialSelection: widget.state.value,
             enabled: widget.state.enabled,
-            dropdownMenuEntries: widget.state.options
+            dropdownMenuEntries: options
                 .map((e) => widget.entryBuilder?.call(e) ?? DropdownMenuEntry(
                     value: e,
-                    label: widget.state.configuration.customLabel?.call(e) ?? e.toString(),
+                    label: config.customLabel?.call(e) ?? e.toString(),
             ))
                 .toList()
         );

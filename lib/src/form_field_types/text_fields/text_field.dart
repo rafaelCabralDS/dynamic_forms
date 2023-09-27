@@ -74,6 +74,7 @@ final class TextFieldState extends BaseTextFieldState {
     super.isRequired,
     super.enabled,
     super.jsonEntryMapper,
+    super.callback,
   }) : super(
       configuration: configuration
   );

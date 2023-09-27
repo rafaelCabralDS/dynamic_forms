@@ -60,8 +60,10 @@ final class PhoneFieldState extends BaseTextFieldState {
   @override
   bool validator(String? v) {
     if (v == null) return false;
-    const phoneRegex = r'^\(\d{2}\)\s?\d{5}\s?\-\s?\d{4}$';
-    return RegExp(phoneRegex).hasMatch(v);
+    const phoneRegex =r'\(\d{2}\)\d{5}-\d{4}|\(\d{2}\)\d{5}-\d{3}';
+    //const phoneRegex = r"\(\d{2}\) \d{4}(?: - \d{4})?|\(\d{2}\) \d{5}(?: - \d{4})?";
+    //const phoneRegex = r'^\(\d{2}\)\s?\d{5}\s?\-\s?\d{4}$';
+    return RegExp(phoneRegex).hasMatch(v.replaceAll(" ", ""));
   }
 
 

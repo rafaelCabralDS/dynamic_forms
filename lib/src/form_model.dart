@@ -258,3 +258,9 @@ class FormModel {
    */
 
 }
+
+extension DynamicFieldExtension on DynamicFormFieldState {
+
+  FormModel get asForm => FormModel.singleField(field: this);
+
+}

@@ -9,6 +9,7 @@ final class SwitchFieldState extends DynamicFormFieldState<bool> {
     super.enabled,
     SwitcherFieldConfiguration configuration = SwitcherFieldConfiguration.factory,
     super.isRequired,
+    super.callback,
   }) : super(configuration: configuration);
 
   @override

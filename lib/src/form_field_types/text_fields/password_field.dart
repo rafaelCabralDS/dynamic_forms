@@ -39,12 +39,14 @@ final class PasswordFieldState extends BaseTextFieldState {
   PasswordFieldState({
     required super.key,
     super.enabled,
+    super.callback,
     PasswordFieldConfiguration configuration = PasswordFieldConfiguration.factory
   }) : super(
     isRequired: true,
     initialValue: null,
     hidden: true,
     configuration: configuration,
+
   );
 
   factory PasswordFieldState.fromJSON(Map<String, dynamic> json) => PasswordFieldState(

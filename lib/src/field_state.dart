@@ -33,11 +33,16 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
     T? initialValue,
     bool? isRequired,
     bool? enabled,
+    void Function(T?)? callback,
   }) :
         _error = null,
         _enabled = enabled ?? true,
         _value = initialValue,
-        isRequired = isRequired ?? true;
+        isRequired = isRequired ?? true {
+    if (callback != null) {
+      listenItself(callback);
+    }
+  }
 
 
   final String key;
