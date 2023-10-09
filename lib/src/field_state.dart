@@ -1,3 +1,4 @@
+import 'package:dynamic_forms/src/form_field_types/autocompleter_field.dart';
 import 'package:flutter/material.dart';
 import 'form_field_configuration.dart';
 
@@ -17,6 +18,7 @@ export 'form_field_types/expandable_field.dart';
 export 'package:file_picker/file_picker.dart';
 export 'form_field_types/file_field.dart';
 export 'form_field_types/table_field/table_field_state.dart';
+export 'form_field_types/autocompleter_field.dart';
 
 /// This is the base class of any form field state
 abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
@@ -143,9 +145,12 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
       case FormFieldType.file: return FilePickerFieldState.fromJSON(json) as DynamicFormFieldState<T>;
       case FormFieldType.expandable: return ExpandableFieldState.fromJSON(json) as DynamicFormFieldState<T>;
       case FormFieldType.table: return TableFieldState.fromJSON(json) as DynamicFormFieldState<T>;
+      case FormFieldType.autocomplete: return AutocompleteFieldState.fromJSON(json) as DynamicFormFieldState<T>;
     }
     
   }
+
+   
 
 }
 

@@ -2,6 +2,7 @@ import 'package:dynamic_forms/src/components/dynamic_form_theme.dart';
 import 'package:dynamic_forms/src/field_state.dart';
 import 'package:dynamic_forms/src/form_controller.dart';
 import 'package:dynamic_forms/src/form_field_configuration.dart';
+import 'package:dynamic_forms/src/form_field_types/autocompleter_field.dart';
 import 'package:dynamic_forms/src/utils.dart';
 import 'package:flutter/material.dart' ;
 
@@ -91,7 +92,8 @@ class FieldBuilder extends StatelessWidget {
                 case AvailableTextFieldInputTypes.cpf: return style.cpfFieldBuilder(state as CpfFieldState);
                 case AvailableTextFieldInputTypes.date: return style.dateTextFormFieldBuilder(state as DateTextFieldState);
               }
-
+            case FormFieldType.autocomplete:
+              return style.autocompleteFieldBuilder.call(state as AutocompleteFieldState);
             case FormFieldType.switcher:
               return style.switchFormFieldBuilder.call(state as SwitchFieldState);
             case FormFieldType.checkbox:
@@ -171,8 +173,8 @@ class SubformBuilder extends StatelessWidget {
         FormFieldsBuilder(fields: subform.fieldsMatrix, style: style),
 
         SeparatedColumn(
-          data: subform.subforms ?? [],
-          itemBuilder: (_,i) => SubformBuilder(subform: subform.subforms![i]),
+          data: subform.subforms,
+          itemBuilder: (_,i) => SubformBuilder(subform: subform.subforms[i]),
           separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
         ),
 

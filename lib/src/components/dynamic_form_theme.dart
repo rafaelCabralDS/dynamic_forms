@@ -1,4 +1,5 @@
 import 'package:dynamic_forms/src/components/form_builder.dart';
+import 'package:dynamic_forms/src/form_field_types/autocompleter_field.dart';
 import 'package:dynamic_forms/src/form_field_types/checkbox_field.dart';
 import 'package:dynamic_forms/src/form_field_types/dropdown_field.dart';
 import 'package:dynamic_forms/src/form_field_types/expandable_field.dart';
@@ -32,6 +33,7 @@ class DynamicFormThemeData with Diagnosticable {
   final FileFormFieldBuilder fileFormFieldBuilder;
   final ExpandableFieldBuilder expandableFieldBuilder;
   final TableFieldStyle tableFieldStyle;
+  final AutocompleteTextFormFieldBuilder autocompleteFieldBuilder;
 
   /// A map that overrides the default fields builders for specific field
   /// by the key value
@@ -56,6 +58,7 @@ class DynamicFormThemeData with Diagnosticable {
     this.dropdownFieldBuilder = defaultDropdownFormFieldBuilder,
     this.switchFormFieldBuilder = defaultSwitchFormFieldBuilder,
     this.fileFormFieldBuilder = defaultFilePickerFormFieldBuilder,
+    this.autocompleteFieldBuilder = defaultAutocompleteFieldBuilder,
     this.runningSpacing = 10.0,
     this.verticalSpacing = 10.0,
     this.customFieldsBuilder,
@@ -85,6 +88,7 @@ class DynamicFormThemeData with Diagnosticable {
     SwitcherFormFieldBuilder? switchFormFieldBuilder,
     FileFormFieldBuilder? fileFormFieldBuilder,
     ExpandableFieldBuilder? expandableFieldBuilder,
+    AutocompleteTextFormFieldBuilder? autocompleteFieldBuilder,
     Map<String, DynamicFormFieldBuilder>? customFieldsBuilder,
     double? runningSpacing,
     double? verticalSpacing,
@@ -112,6 +116,7 @@ class DynamicFormThemeData with Diagnosticable {
       formHeaderBuilder: formHeaderBuilder ?? this.formHeaderBuilder,
       subformHeaderBuilder: subformHeaderBuilder ?? this.subformHeaderBuilder,
       tableFieldStyle: tableFieldStyle ?? this.tableFieldStyle,
+      autocompleteFieldBuilder: autocompleteFieldBuilder ?? this.autocompleteFieldBuilder,
     );
   }
 
@@ -151,6 +156,7 @@ class DynamicFormThemeData with Diagnosticable {
   static Widget defaultFormHeaderBuilder(FormModel form) => DefaultFormHeaderBuilder(form: form);
   static Widget defaultSubformHeaderBuilder(FormModel subform) => DefaultSubFormHeaderBuilder(subform: subform);
   static Widget defaultExpandableFieldBuilder(ExpandableBaseFieldState state) => BuildExpandableField(state: state);
+  static Widget defaultAutocompleteFieldBuilder(AutocompleteFieldState state) => DefaultAutocompleteTextFieldBuilder(state: state);
 
 }
 

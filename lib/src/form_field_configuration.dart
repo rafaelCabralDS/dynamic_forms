@@ -1,4 +1,5 @@
 
+import 'package:dynamic_forms/src/form_field_types/autocompleter_field.dart';
 import 'package:dynamic_forms/src/form_field_types/checkbox_field.dart';
 import 'package:dynamic_forms/src/form_field_types/dropdown_field.dart';
 import 'package:dynamic_forms/src/form_field_types/expandable_field.dart';
@@ -16,7 +17,8 @@ enum FormFieldType {
   dropdownMenu("dropdown"),
   file("file"),
   expandable("expandable"),
-  table("table");
+  table("table"),
+  autocomplete("autocomplete");
 
   final String key;
   const FormFieldType(this.key);
@@ -64,6 +66,7 @@ base class FormFieldConfiguration {
       case FormFieldType.file: return FileFieldConfiguration.fromJSON(json);
       case FormFieldType.expandable: return ExpandableFieldConfiguration.fromJSON(json);
       case FormFieldType.table: return TableFieldConfiguration.fromJSON(json);
+      case FormFieldType.autocomplete: return BaseTextFormFieldConfiguration.fromJSON(json);
     }
   }
 
