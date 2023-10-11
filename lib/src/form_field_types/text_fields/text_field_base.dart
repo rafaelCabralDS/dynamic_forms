@@ -168,7 +168,6 @@ typedef DateTextFormFieldBuilder = Widget Function(DateTextFieldState field);
 
 class DefaultTextFieldBuilder extends StatefulWidget {
 
-
   const DefaultTextFieldBuilder({
     super.key,
     required this.state,

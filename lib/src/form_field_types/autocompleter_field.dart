@@ -49,22 +49,53 @@ final class AutocompleteFieldState extends DynamicFormFieldState<String?> {
 
 }
 
-typedef AutocompleteTextFormFieldBuilder = Widget Function(AutocompleteFieldState field);
 
-class DefaultAutocompleteTextFieldBuilder extends StatefulWidget {
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+class AutocompleteFieldStyle {
+
+  final Widget Function(AutocompleteFieldState state, TextEditingController textController, FocusNode focusNode)? textFieldBuilder;
+  final Widget Function(BuildContext, void Function(String), Iterable<String>)? optionsViewBuilder;
+
+  const AutocompleteFieldStyle({
+    this.textFieldBuilder,
+    this.optionsViewBuilder,
+  });
+
+  static const AutocompleteFieldStyle factory = AutocompleteFieldStyle();
+
+}
+
+class AutocompleteFieldBuilder extends StatefulWidget {
 
   final AutocompleteFieldState state;
 
-  const DefaultAutocompleteTextFieldBuilder({super.key, required this.state});
+  const AutocompleteFieldBuilder({super.key, required this.state});
 
   @override
-  State<DefaultAutocompleteTextFieldBuilder> createState() => _DefaultAutocompleteTextFieldBuilderState();
+  State<AutocompleteFieldBuilder> createState() => _AutocompleteFieldBuilderState();
 }
 
-class _DefaultAutocompleteTextFieldBuilderState extends State<DefaultAutocompleteTextFieldBuilder> {
+class _AutocompleteFieldBuilderState extends State<AutocompleteFieldBuilder> {
+
+  Widget _defaultTextField(TextEditingController textController, FocusNode focusNode) => TextField(
+    controller: textController,
+    focusNode: focusNode,
+    onChanged: (v) => widget.state.value = v,
+    enabled: widget.state.enabled,
+    decoration: InputDecoration(
+      labelText: widget.state.configuration.label ?? widget.state.key,
+      errorText: widget.state.error,
+      hintText: widget.state.configuration.label,
+      suffixIcon: Icon(widget.state.configuration.suffixIcon),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
+
+    var style = DynamicFormTheme.of(context).autocompleteFieldStyle;
+
     return Autocomplete(
         initialValue: TextEditingValue(text: widget.state.value ?? ""),
         optionsBuilder: (TextEditingValue value) {
@@ -77,18 +108,9 @@ class _DefaultAutocompleteTextFieldBuilderState extends State<DefaultAutocomplet
           
         },
         onSelected: (v) => widget.state.value = v,
-        fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) => TextField(
-          controller: textController,
-          focusNode: focusNode,
-          onChanged: (v) => widget.state.value = v,
-          enabled: widget.state.enabled,
-          decoration: InputDecoration(
-            labelText: widget.state.configuration.label ?? widget.state.key,
-            errorText: widget.state.error,
-            hintText: widget.state.configuration.label,
-            suffixIcon: Icon(widget.state.configuration.suffixIcon),
-          ),
-        ),
+        fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) =>
+          style.textFieldBuilder?.call(widget.state, textController, focusNode) ?? _defaultTextField(textController, focusNode),
+        optionsViewBuilder: style.optionsViewBuilder,
     );
   }
 }

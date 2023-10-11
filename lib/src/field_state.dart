@@ -18,7 +18,7 @@ export 'form_field_types/expandable_field.dart';
 export 'package:file_picker/file_picker.dart';
 export 'form_field_types/file_field.dart';
 export 'form_field_types/table_field/table_field_state.dart';
-export 'form_field_types/autocompleter_field.dart';
+export 'form_field_types/autocompleter_field.dart' hide AutocompleteFieldBuilder;
 
 /// This is the base class of any form field state
 abstract base class DynamicFormFieldState<T> extends ChangeNotifier {

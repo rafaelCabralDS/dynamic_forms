@@ -93,7 +93,7 @@ class FieldBuilder extends StatelessWidget {
                 case AvailableTextFieldInputTypes.date: return style.dateTextFormFieldBuilder(state as DateTextFieldState);
               }
             case FormFieldType.autocomplete:
-              return style.autocompleteFieldBuilder.call(state as AutocompleteFieldState);
+              return AutocompleteFieldBuilder(state: state as AutocompleteFieldState);
             case FormFieldType.switcher:
               return style.switchFormFieldBuilder.call(state as SwitchFieldState);
             case FormFieldType.checkbox:
