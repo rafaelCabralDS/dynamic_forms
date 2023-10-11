@@ -25,11 +25,6 @@ class TableFieldGridSource extends DataGridSource {
     )).toList());
   }
 
-  List<StackedHeaderRow> headers() {
-    return [];
-  }
-
-
   /// /////////////////////////////////////////////////////////////// Editing //////////////////////////////////////////////////////////////////////////////
 
 
@@ -114,7 +109,7 @@ class TableFieldGridSource extends DataGridSource {
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
     return DataGridRowAdapter(cells: row.getCells()
-        .map<Widget>((e) => DefaultTableCell(cell: e as DataGridCell<DynamicFormFieldState>))
+        .map<Widget>((e) => DefaultTableCell(e as DataGridCell<DynamicFormFieldState>))
         .toList());
   }
 

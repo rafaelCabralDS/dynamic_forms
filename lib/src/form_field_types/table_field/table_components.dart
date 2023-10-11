@@ -7,30 +7,6 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 
 
-class DefaultTableCell extends StatelessWidget {
-
-  final DataGridCell<DynamicFormFieldState> cell;
-  const DefaultTableCell({super.key, required this.cell});
-
-  @override
-  Widget build(BuildContext context) {
-
-    var style = DynamicFormTheme.of(context);
-
-    return Center(
-      child: Text(
-        cell.value?.value ?? cell.columnName,
-        style: cell.value != null
-            ? style.tableFieldStyle.filledCellStyle
-            : style.tableFieldStyle.emptyCellTextStyle,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
-}
-
-
-
 class TableFieldStyle {
 
   final TextStyle? filledCellStyle;
@@ -38,8 +14,13 @@ class TableFieldStyle {
   final TextStyle? headerTextStyle;
 
   final Color? headerColor;
+  final Color? rowHoverColor;
   final Widget Function()? footerBuilder;
   final double? footerHeight;
+  final Widget Function(DynamicFormFieldState e)? cellBuilder;
+  final Widget Function(DynamicFormFieldState e)? disabledCellBuilder;
+  final GridLinesVisibility gridLinesVisibility;
+  final double headerRadius;
 
   const TableFieldStyle({
     this.filledCellStyle,
@@ -48,11 +29,47 @@ class TableFieldStyle {
     this.headerTextStyle,
     this.footerBuilder,
     this.footerHeight,
+    this.cellBuilder,
+    this.disabledCellBuilder,
+    this.gridLinesVisibility = GridLinesVisibility.horizontal,
+    this.rowHoverColor,
+    this.headerRadius = 10.0,
   });
 
 
 }
 
+
+class DefaultTableCell extends StatelessWidget {
+
+  final DataGridCell<DynamicFormFieldState> cell;
+
+  const DefaultTableCell(this.cell, {super.key});
+
+  Widget _buildDefault(TableFieldStyle style) {
+
+    return Center(child: Text(cell.value.toString(),
+        style: cell.value == null
+            ? style.emptyCellTextStyle
+            : style.filledCellStyle)
+    );
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var style = DynamicFormTheme.of(context);
+
+    if (cell.value!.value == null) {
+      return style.tableFieldStyle.disabledCellBuilder?.call(cell.value!)
+          ?? _buildDefault(style.tableFieldStyle);
+    } else {
+      return style.tableFieldStyle.cellBuilder?.call(cell.value!)
+          ?? _buildDefault(style.tableFieldStyle);
+    }
+
+  }
+}
 
 
 class TableFieldBuilder extends StatefulWidget {
@@ -100,34 +117,40 @@ class _TableFieldBuilderState extends State<TableFieldBuilder> {
         gridLineStrokeWidth: 0,
         frozenPaneLineWidth: 0,
         frozenPaneElevation: 0,
-
-        //headerHoverColor: ,
-
+        headerHoverColor: Colors.transparent,
+        rowHoverColor: style.tableFieldStyle.rowHoverColor,
       ),
-      child: SfDataGrid(
-        source: _source,
-        //shrinkWrapColumns: true,
-        shrinkWrapRows: true,
-        columnWidthMode: ColumnWidthMode.fill,
-        editingGestureType: EditingGestureType.tap,
-        selectionMode: SelectionMode.single,
-        navigationMode: GridNavigationMode.cell,
-        footer: _buildFooter(),
-        footerHeight: style.tableFieldStyle.footerHeight ?? 49.9,
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(style.tableFieldStyle.headerRadius)
+        ),
+        child: SfDataGrid(
+          source: _source,
+          gridLinesVisibility: style.tableFieldStyle.gridLinesVisibility,
+          headerGridLinesVisibility: style.tableFieldStyle.gridLinesVisibility,
+          shrinkWrapRows: true,
+          columnWidthMode: ColumnWidthMode.fill,
+          editingGestureType: EditingGestureType.tap,
+          selectionMode: SelectionMode.single,
+          navigationMode: GridNavigationMode.cell,
+          footer: _buildFooter(),
+          footerHeight: style.tableFieldStyle.footerHeight ?? 49.9,
 
-        allowEditing: true,
-        //headerGridLinesVisibility:GridLinesVisibility.vertical,
 
-        stackedHeaderRows: [],
+          allowEditing: true,
+          //headerGridLinesVisibility:GridLinesVisibility.vertical,
 
-        columns: widget.state.sample.allFields.map((e) => GridColumn(
-            columnName: e.key,
-            label: Center(
-                child: Text(
-                  e.configuration.label ?? e.key,
-                  style: style.tableFieldStyle.headerTextStyle,
-                ))
-        )).toList(),
+          stackedHeaderRows: [],
+
+          columns: widget.state.sample.allFields.map((e) => GridColumn(
+              columnName: e.key,
+              label: Center(
+                  child: Text(
+                    e.configuration.label ?? e.key,
+                    style: style.tableFieldStyle.headerTextStyle,
+                  ))
+          )).toList(),
+        ),
       ),
     );
 
