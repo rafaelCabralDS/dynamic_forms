@@ -117,7 +117,7 @@ final class DateTextFieldState extends BaseTextFieldState {
     super.callback,
   }) : super(
 
-      initialValue: initialValue != null ? "${initialValue.day}${initialValue.month}/${initialValue.year}" : null,
+      initialValue: initialValue != null ? "${initialValue.day}/${initialValue.month}/${initialValue.year}" : null,
       configuration: configuration ?? DateTextFieldConfiguration.any());
 
   factory DateTextFieldState.fromJSON(Map<String, dynamic> json) => DateTextFieldState(
