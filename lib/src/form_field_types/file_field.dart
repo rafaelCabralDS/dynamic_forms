@@ -3,6 +3,8 @@ import 'package:dynamic_forms/src/form_field_configuration.dart';
 import 'package:flutter/material.dart';
 import '../utils.dart';
 
+export 'package:file_picker/file_picker.dart';
+
 enum SupportedFiles {
   pdf(["pdf"]),
   image(["jpg", "png", "jpeg"]),
@@ -79,9 +81,8 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
     required super.configuration,
     super.isRequired,
     super.callback,
-  }) : super(
-    initialValue: []
-  );
+    super.initialValue,
+  }) : super();
 
   factory FilePickerFieldState.fromJSON(Map<String, dynamic> json) => FilePickerFieldState(
       key: json[DynamicFormFieldState.KEY_KEY],
@@ -94,13 +95,6 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
 
   bool get isFull => value.length == configuration.limit;
 
-  /*
-  @override
-  MapEntry<String, dynamic> asJsonEntry() {
-    return MapEntry(key, null);
-  }
-
-   */
 
   @override
   bool validator(List<PlatformFile>? v) => v != null;
