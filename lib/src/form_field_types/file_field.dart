@@ -81,8 +81,9 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
     required super.configuration,
     super.isRequired,
     super.callback,
-    super.initialValue,
-  }) : super();
+    List<PlatformFile> initialValue = const [],
+    super.jsonEntryMapper,
+  }) :super(initialValue: List.from(initialValue));
 
   factory FilePickerFieldState.fromJSON(Map<String, dynamic> json) => FilePickerFieldState(
       key: json[DynamicFormFieldState.KEY_KEY],
@@ -109,7 +110,7 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
   }
 
   Future<void> pick() async {
-    assert (value.length < (configuration.limit ?? 1000), "Too many files have being picker already");
+    assert (value.length < (configuration.limit), "Too many files have being picker already");
     try {
 
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -117,6 +118,7 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
           allowedExtensions: SupportedFiles.asExtensionList(configuration.supportedInputFiles),
           allowMultiple: configuration.multiplePicks,
       );
+
       if (result == null) return;
 
       value.addAll(result.files);
@@ -224,11 +226,11 @@ class _DefaultFilePickerBuilderState extends State<DefaultFilePickerBuilder> {
             borderRadius: BorderRadius.circular(10.0),
             border: Border.all(color: Colors.grey),
           ),
-          child: Icon(Icons.add_rounded, color: Colors.grey),
+          child: const Icon(Icons.add_rounded, color: Colors.grey),
         ),
 
         const SizedBox(height: 5),
-        Expanded(child: Text("Adicionar", overflow: TextOverflow.ellipsis,)),
+        const Expanded(child: Text("Adicionar", overflow: TextOverflow.ellipsis,)),
       ],
     ),
   );
@@ -267,7 +269,7 @@ class _DefaultFilePickerBuilderState extends State<DefaultFilePickerBuilder> {
                         itemBuilder: (_, i) => SizedBox.square(
                             child: _buildPickPreview(widget.state.value[i])
                         )),
-                        SizedBox(width: 10.0),
+                        const SizedBox(width: 10.0),
                         _buildAddFile(),
 
                     ],

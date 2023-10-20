@@ -13,12 +13,24 @@ abstract mixin class FormController {
   List<DynamicFormFieldState> get requiredFields;
   List<DynamicFormFieldState> get optionalFields;
 
+  /// Return the controller valid state. Does not update any field error state
   bool get isValid {
     bool requiredAreReady = requiredFields.every((element) => element.isValid);
-    bool optionalFieldsAreReady = optionalFields.where((element) => element.value != null).every((element) => element.isValid);
+    bool optionalFieldsAreReady = optionalFields
+        .where((element) {
+
+          // text field can have a "fake null" when you write something and erase it
+          if (element is BaseTextFieldState) {
+            return element.value != null && element.value!.isNotEmpty;
+          }else {
+            return element.value != null;
+          }
+    })
+        .every((element) => element.isValid);
     return requiredAreReady && optionalFieldsAreReady;
   }
 
+  /// Validates and activates/disables error states for the fields
   bool validate({bool validateInBatch = true});
 
   void clearErrors();
@@ -218,10 +230,10 @@ class MultipleFormController extends ChangeNotifier with FormController {
   }
 
   @override
-  T findByKey<T extends DynamicFormFieldState>(String fieldKey) {
+  T findByKey<T extends DynamicFormFieldState>(String key) {
 
     try {
-      var keys = fieldKey.split(".");
+      var keys = key.split(".");
       var form = getFormByKey(keys[0]);
 
       return (form.isSingleFormField
@@ -229,7 +241,7 @@ class MultipleFormController extends ChangeNotifier with FormController {
           : form.findByKey(keys.sublist(1).join("."))) as T;
 
     } catch (_) {
-      throw Exception("There is no $fieldKey field in this controller");
+      throw Exception("There is no $key field in this controller");
     }
   }
 

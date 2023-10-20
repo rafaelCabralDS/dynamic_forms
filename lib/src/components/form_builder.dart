@@ -36,13 +36,23 @@ class DynamicForm extends StatelessWidget {
                     var forms = (controller as MultipleFormController).forms;
                     return SeparatedColumn(
                       data: forms,
-                      itemBuilder: (_,i) => FormBuilder(form: forms[i]),
+                      itemBuilder: (_,i) => AnimatedBuilder(
+                        animation: forms[i],
+                        builder: (context, child) {
+                          return FormBuilder(form: forms[i]);
+                        }
+                      ),
                       separatorBuilder: (_,i) => SizedBox(height: theme.verticalSpacing),
                     );
                   }
               );
             } else {
-              return FormBuilder(form: (controller as SingleFormController).form);
+              return AnimatedBuilder(
+                animation: (controller as SingleFormController).form,
+                builder: (context, child) {
+                  return FormBuilder(form: (controller as SingleFormController).form);
+                }
+              );
             }
           },
         )
@@ -139,7 +149,12 @@ class FormBuilder extends StatelessWidget {
 
         SeparatedColumn(
           data: form.subforms,
-          itemBuilder: (_,i) => SubformBuilder(subform: form.subforms[i]),
+          itemBuilder: (_,i) => AnimatedBuilder(
+            animation: form.subforms[i],
+            builder: (context, child) {
+              return SubformBuilder(subform: form.subforms[i]);
+            }
+          ),
           separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
         ),
 

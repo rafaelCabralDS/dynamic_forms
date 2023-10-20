@@ -2,8 +2,9 @@
 
 import 'package:dynamic_forms/src/field_state.dart';
 import 'package:dynamic_forms/src/utils.dart';
+import 'package:flutter/cupertino.dart';
 
-class FormModel {
+class FormModel extends ChangeNotifier {
 
   static const String FORM_KEY = "form"; // Field name
   static const String FORM_TITLE_KEY = "title"; // String?
@@ -193,8 +194,10 @@ class FormModel {
   }
 
 
+  /// Find a field in the tree by their key.
+  /// If it is a field inside a subform, the subform key must be informed as well like
+  /// subformKey.fieldKey
   T findByKey<T extends DynamicFormFieldState>(String key) {
-
     try {
       return _findByKey(this, key);
     } catch (_) {
@@ -231,31 +234,52 @@ class FormModel {
     }
   }
 
-  /*
-  static bool patternMatching(FormModel v1, FormModel v2) {
-
-    var sameKeys = {v1.expandedMainFields.map((e) => e.key)}
-        .difference({v2.expandedMainFields.map((e) => e.key)}).isEmpty;
-
-    if (!sameKeys) return false;
-
-    var sameTypes = {v1.expandedMainFields.map((e) => MapEntry(e.key, e.runtimeType))}
-        .difference({v2.expandedMainFields.map((e) => MapEntry(e.key, e.runtimeType))}).isEmpty;
-
-    if (!sameTypes) return false;
-
-    for (FormModel subform1 in v1.subforms ?? []) {
-
-      var matchingSubform = v2.subforms?.singleWhereOrNull((e) => e.key == subform1.key);
-      if (matchingSubform == null) return false;
-
-      var subformMatches = patternMatching(subform1, matchingSubform);
-      if (!subformMatches) return false;
-    }
-    return true;
+  void addRowFields(List<DynamicFormFieldState> fields, int rowIndex) {
+    assert(rowIndex >= 0 && rowIndex < _fields.length);
+    assert(fields.every((e) => !keys.contains(e.key)));
+    _fields[rowIndex].addAll(fields);
+    notifyListeners();
   }
 
-   */
+  void addRow(List<DynamicFormFieldState> row) {
+    assert(row.every((e) => !keys.contains(e.key)));
+    _fields.add(row);
+    notifyListeners();
+  }
+
+  void addFieldsMatrix(List<List<DynamicFormFieldState>> matrix) {
+    assert(matrix.expand((element) => element).every((e) => !keys.contains(e.key)));
+
+    for (var row in matrix) {
+      _fields.add(row);
+    }
+    notifyListeners();
+  }
+
+  void removeRow(int i) {
+    assert(_fields.length > 1, "A FormModel must have at least one row and one column");
+    assert(i >= 0 && i < _fields.length);
+    _fields.removeAt(i);
+    notifyListeners();
+  }
+
+  /// Try to removes all fields bellow (inclusive) the given index row
+  void removeBellow(int rowIndex) {
+    assert(rowIndex > 0);
+    _fields.removeRange(rowIndex, _fields.length);
+    notifyListeners();
+  }
+
+  void addSubForm(FormModel form) {
+    subforms.add(form);
+    notifyListeners();
+  }
+
+  void removeSubForm(int i) {
+    assert(i >= 0 && i < subforms.length);
+    subforms.removeAt(i);
+    notifyListeners();
+  }
 
 }
 

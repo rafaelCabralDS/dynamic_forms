@@ -49,6 +49,8 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
 
   final String key;
   final FormFieldConfiguration configuration;
+
+  /// Override the default json value parsing
   final dynamic Function(T?)? jsonEntryMapper;
 
   /// An required field will be validated (Default is true)
