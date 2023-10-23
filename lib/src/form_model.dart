@@ -179,7 +179,6 @@ class FormModel extends ChangeNotifier {
       // [fieldKey: {fieldKey: fieldValue}] to [fieldKey: fieldValue]
       var isSingleField = fields.length == 1 && fields[0].key == subform.key;
 
-
       data[subform.key!] = (isSingleField)
           ? fields.first.asJsonEntry().value
           : subform.toJSON();
@@ -286,5 +285,44 @@ class FormModel extends ChangeNotifier {
 extension DynamicFieldExtension on DynamicFormFieldState {
 
   FormModel get asForm => FormModel.singleField(field: this);
+
+
+}
+
+extension FormExtension on FormModel {
+
+  FormModel get locked => FormModel(
+    fields: _fields.map((e) => e.map((e) => e..enabled = false).toList()).toList(),
+    key: key,
+    title: title,
+    desc: desc,
+    subforms: subforms,
+    shouldShrink: shouldShrink
+  );
+
+/*
+  bool samePatternAs(FormModel other) {
+
+    var firstCheck = other.shouldShrink == shouldShrink &&
+           other.key == key &&
+           other.keys == keys;
+
+    if (firstCheck) {
+      for (var otherField in other.allFields) {
+        var thisField = findByKey(otherField.key);
+        if (thisField.runtimeType == thisField.runtimeType) {
+
+        }
+
+      }
+
+    }
+
+
+
+  }
+
+ */
+
 
 }

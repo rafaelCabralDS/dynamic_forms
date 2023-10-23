@@ -40,10 +40,13 @@ abstract base class ExpandableBaseFieldState<T> extends DynamicFormFieldState<Li
     required this.dataFactory,
     super.jsonEntryMapper,
     super.callback,
+    List<T> initialValue = const [],
   }) : super(
-    initialValue: [dataFactory(0)],
+    initialValue: initialValue.isEmpty ? [dataFactory(0)] : List.from(initialValue)
   ) {
-    _internalListener(value.first);
+    for (T e in initialValue) {
+      _internalListener(e);
+    }
   }
 
 
@@ -114,6 +117,7 @@ final class ExpandableFieldState<E> extends ExpandableBaseFieldState<DynamicForm
     super.configuration = const ExpandableFieldConfiguration(),
     super.isRequired,
     super.jsonEntryMapper,
+    super.initialValue,
   }) : super();
 
   factory ExpandableFieldState.fromJSON(Map<String, dynamic> json) => throw UnimplementedError();
@@ -156,6 +160,7 @@ final class ExpandableFormFieldState extends ExpandableBaseFieldState<FormModel>
     super.isRequired,
     super.configuration = const ExpandableFieldConfiguration(),
     super.jsonEntryMapper,
+    super.initialValue,
   });
 
 

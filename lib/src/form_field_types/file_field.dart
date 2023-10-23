@@ -1,9 +1,122 @@
-import 'package:dynamic_forms/src/field_state.dart';
-import 'package:dynamic_forms/src/form_field_configuration.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import '../utils.dart';
 
 export 'package:file_picker/file_picker.dart';
+import 'dart:typed_data';
+import 'package:dynamic_forms/dynamic_forms.dart';
+
+
+///   A class that can describe both a file that came from local storage [data], downloaded from the db [data]
+/// or just as a promise of a file based on the [path].
+///   It also holds optional metadata information
+sealed class FileModel with EquatableMixin {
+
+
+  const FileModel._({
+    this.data,
+    this.path,
+    this.metadata,
+    required this.size,
+    required this.name,
+    this.extension,
+  });
+
+  final Uint8List? data;
+  final String? path;
+  final Map<String,String>? metadata;
+
+  final int size;
+  final String name;
+  final String? extension;
+
+  PlatformFile get asPlatformFile => PlatformFile(
+    name: name,
+    size: size,
+    bytes: data,
+  );
+
+  /// It can get either a url or a PlatformFile as json payload
+  static FileModel? tryFile(dynamic file) {
+    if (file is String) return UrlFile(url: file);
+    if (file is PlatformFile) {
+      if (file.bytes == null) return CorruptedFile(name: file.name);
+      return BytesFile(bytes: file.bytes!, name: file.name, size: file.size);
+    }
+    return null;
+  }
+
+  @override
+  List<Object?> get props => [data, path, size, name];
+
+}
+
+class BytesFile extends FileModel {
+
+  const BytesFile({
+    required Uint8List? bytes,
+    required super.name,
+    required super.size,
+    super.extension,
+    super.metadata,
+  }) : super._(path: null, data: bytes);
+
+
+  @override
+  Uint8List? get data => super.data as Uint8List;
+
+  @override
+  List<Object?> get props => [data, size, name];
+
+}
+
+class UrlFile extends FileModel {
+
+  UrlFile({
+    required String url,
+    super.extension,
+    String? name,
+    int? size,
+    super.metadata,
+  }) : super._(path: url, data: null,  size: size ?? -1, name: name ?? url.split("/").last);
+
+  @override
+  String get path => super.path as String;
+
+  UrlFile copyWith({
+    int? size,
+    String? url,
+    String? extension,
+    Map<String,String>? customMetadata,
+    String? name,
+  }) => UrlFile(
+      url: url ?? path,
+      extension: extension ?? this.extension,
+      name: name ?? this.name,
+      metadata:  metadata ?? metadata,
+      size: size ?? this.size
+  );
+
+  @override
+  List<Object?> get props => [path];
+
+}
+
+/// A file that failed when downloading the data. It can represent a corrupted file saved on the db for example,
+/// or just a read error
+class CorruptedFile extends FileModel{
+  const CorruptedFile({
+    super.path,
+    super.extension,
+    required super.name,
+    super.metadata,
+  }) : super._(size: -2, data: null);
+
+  @override
+  List<Object?> get props => [path, name];
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum SupportedFiles {
   pdf(["pdf"]),
@@ -29,6 +142,7 @@ enum SupportedFiles {
   static List<SupportedFiles> fromExtensions(List<String> extensions) => extensions.map((e) => fromExtension(e)).toList();
 
 }
+
 
 final class FileFieldConfiguration extends FormFieldConfiguration {
 
@@ -74,14 +188,14 @@ final class FileFieldConfiguration extends FormFieldConfiguration {
   final List<SupportedFiles> supportedInputFiles;
 }
 
-final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile>> {
+final class FilePickerFieldState extends DynamicFormFieldState<List<FileModel>> {
 
   FilePickerFieldState({
     required super.key,
     required super.configuration,
     super.isRequired,
     super.callback,
-    List<PlatformFile> initialValue = const [],
+    List<FileModel> initialValue = const [],
     super.jsonEntryMapper,
   }) :super(initialValue: List.from(initialValue));
 
@@ -92,13 +206,12 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
   );
 
   @override
-  List<PlatformFile> get value => super.value!;
+  List<FileModel> get value => super.value!;
 
   bool get isFull => value.length == configuration.limit;
 
-
   @override
-  bool validator(List<PlatformFile>? v) => v != null;
+  bool validator(List<FileModel>? v) => v != null;
 
   @override
   FileFieldConfiguration get configuration => super.configuration as FileFieldConfiguration;
@@ -113,7 +226,7 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
     assert (value.length < (configuration.limit), "Too many files have being picker already");
     try {
 
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
           allowedExtensions: SupportedFiles.asExtensionList(configuration.supportedInputFiles),
           allowMultiple: configuration.multiplePicks,
@@ -121,16 +234,23 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<PlatformFile
 
       if (result == null) return;
 
-      value.addAll(result.files);
+
+      value.addAll(result.files.map((e) => BytesFile(
+        bytes: e.bytes,
+        name: e.name,
+        extension: e.extension,
+        size: e.size,
+      )).toList());
       notifyListeners();
 
     } catch (e) {
+      print(e);
       error = "nonNullErrorValue";
     }
 
   }
 
-  void remove(PlatformFile e) {
+  void remove(FileModel e) {
     value.remove(e);
     notifyListeners();
   }
@@ -177,7 +297,7 @@ class _DefaultFilePickerBuilderState extends State<DefaultFilePickerBuilder> {
     super.initState();
   }
 
-  Widget _buildPickPreview(PlatformFile file) {
+  Widget _buildPickPreview(FileModel file) {
 
     return SizedBox(
       width: 100.0,
@@ -194,14 +314,16 @@ class _DefaultFilePickerBuilderState extends State<DefaultFilePickerBuilder> {
             child: Builder(
               builder: (context) {
 
-                /*
-                if (SupportedFiles.image.extensions.contains(file.extension)) {
-                  return Image(image: MemoryImage(file.bytes));
+                switch (file) {
+
+                  case BytesFile():
+                    return const Icon(Icons.description_rounded, color: Colors.grey);
+                  case UrlFile():
+                  return const Icon(Icons.alternate_email, color: Colors.grey);
+                  case CorruptedFile():
+                  return const Icon(Icons.close, color: Colors.grey);
                 }
 
-                 */
-
-                return const Icon(Icons.description_rounded, color: Colors.grey);
               }
             ),
           ),
