@@ -1,3 +1,4 @@
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import '../utils.dart';
@@ -39,9 +40,10 @@ sealed class FileModel with EquatableMixin {
   /// It can get either a url or a PlatformFile as json payload
   static FileModel? tryFile(dynamic file) {
     if (file is String) return UrlFile(url: file);
+    if (file is BytesFile) return file;
+    if (file is UrlFile) return file;
     if (file is PlatformFile) {
-      if (file.bytes == null) return CorruptedFile(name: file.name);
-      return BytesFile(bytes: file.bytes!, name: file.name, size: file.size);
+      return BytesFile(bytes: file.bytes, name: file.name, size: file.size);
     }
     return null;
   }
@@ -60,13 +62,6 @@ class BytesFile extends FileModel {
     super.extension,
     super.metadata,
   }) : super._(path: null, data: bytes);
-
-
-  @override
-  Uint8List? get data => super.data as Uint8List;
-
-  @override
-  List<Object?> get props => [data, size, name];
 
 }
 
@@ -97,8 +92,6 @@ class UrlFile extends FileModel {
       size: size ?? this.size
   );
 
-  @override
-  List<Object?> get props => [path];
 
 }
 
@@ -112,8 +105,6 @@ class CorruptedFile extends FileModel{
     super.metadata,
   }) : super._(size: -2, data: null);
 
-  @override
-  List<Object?> get props => [path, name];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

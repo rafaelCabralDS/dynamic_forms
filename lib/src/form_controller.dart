@@ -16,11 +16,12 @@ abstract mixin class FormController {
   /// Return the controller valid state. Does not update any field error state
   bool get isValid {
     bool requiredAreReady = requiredFields.every((element) => element.isValid);
+
+
     bool optionalFieldsAreReady = optionalFields
         .where((element) {
-
           // text field can have a "fake null" when you write something and erase it
-          if (element is BaseTextFieldState) {
+          if (element.value is String?) {
             return element.value != null && element.value!.isNotEmpty;
           }else {
             return element.value != null;
@@ -61,7 +62,7 @@ class SingleFormController extends FormController {
 
   @override
   bool validate({bool validateInBatch = true}) {
-
+    clearErrors();
     if (validateInBatch) {
       for (var e in requiredFields) {
         e.validate();
@@ -135,6 +136,7 @@ class MultipleFormController extends ChangeNotifier with FormController {
 
   @override
   bool validate({bool validateInBatch = true}) {
+    clearErrors();
     if (validateInBatch) {
       for (var e in requiredFields) {
         e.validate();
