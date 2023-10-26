@@ -1,7 +1,7 @@
 
 
 import 'package:dynamic_forms/dynamic_forms.dart';
-import 'package:dynamic_forms/src/field_state.dart';
+import 'package:dynamic_forms/src/utils.dart';
 import 'package:flutter/material.dart';
 
 /// A field that can either select from options or insert a new option
@@ -47,6 +47,11 @@ final class AutocompleteFieldState extends DynamicFormFieldState<String?> {
   @override
   bool validator(String? v) => v != null && v.isNotEmpty;
 
+  @override
+  bool get isValid {
+    if (!isRequired && value.isNullOrEmpty) return true; // unfilled optional field
+    return validator(value); // filled optional field
+  }
 
 }
 

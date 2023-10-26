@@ -96,7 +96,6 @@ extension TextInputTypeExtension on String? {
 
 }
 
-
 class DecimalTextInputFormatter extends TextInputFormatter {
   const DecimalTextInputFormatter({required this.decimalRange})
       : assert(decimalRange == null || decimalRange > 0);
@@ -136,7 +135,6 @@ class DecimalTextInputFormatter extends TextInputFormatter {
     return newValue;
   }
 }
-
 
 extension MapExtension on Map<String,dynamic> {
   Map<String, dynamic> flattenMap({String separator = '.'}) {

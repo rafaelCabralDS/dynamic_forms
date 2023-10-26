@@ -88,7 +88,10 @@ abstract base class DynamicFormFieldState<T> extends ChangeNotifier {
 
   /// Only returns if the field is valid or not, it does not change the state to error if it is not
   /// A non required field will be validated if it is not null
-  bool get isValid => isRequired || value != null ? validator(value) : true;
+  bool get isValid {
+    if (!isRequired && value == null) return true; // unfilled optional field
+    return validator(value);
+  }
 
   /// A method to override if you want to auto update the error state if the field is not valid
   bool validate([String invalidMsg = "Campo inválido"]) {

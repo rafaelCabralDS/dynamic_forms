@@ -1,5 +1,6 @@
 import 'package:dynamic_forms/src/field_state.dart';
 import 'package:dynamic_forms/src/form_field_configuration.dart';
+import 'package:dynamic_forms/src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -135,6 +136,12 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
   }
 
   @override
+  bool get isValid {
+    if (!isRequired && value.isNullOrEmpty) return true; // unfilled optional field
+    return validator(value); // filled optional field
+  }
+
+  @override
   bool validate([String invalidMsg = "Campo inválido"]) {
     if (!isValid && error == null) {
       error = invalidMsg;
@@ -144,8 +151,6 @@ abstract base class BaseTextFieldState extends DynamicFormFieldState<String> {
     }
     return isValid;
   }
-
-
 
 
 }

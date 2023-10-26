@@ -202,5 +202,4 @@ final class TextNumberFieldState extends BaseTextFieldState {
   @override
   MapEntry<String, num?> asJsonEntry() => MapEntry(key, value != null ? num.tryParse(value!) : null);
 
-
 }

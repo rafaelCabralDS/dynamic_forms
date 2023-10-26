@@ -39,6 +39,12 @@ abstract mixin class FormController {
   T findByKey<T extends DynamicFormFieldState>(String key);
   void clear();
 
+  void dispose() {
+    for (var field in fields) {
+      field.dispose();
+    }
+  }
+
 }
 
 class SingleFormController extends FormController {

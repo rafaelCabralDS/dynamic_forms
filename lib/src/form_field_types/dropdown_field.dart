@@ -150,6 +150,7 @@ class _DefaultDropdownFieldBuilderState<T extends Object> extends State<DefaultD
             hintText: config.hint ?? config.label,
             initialSelection: widget.state.value,
             enabled: widget.state.enabled,
+            errorText: widget.state.error,
             dropdownMenuEntries: options
                 .map((e) => widget.entryBuilder?.call(e) ?? DropdownMenuEntry(
                     value: e,

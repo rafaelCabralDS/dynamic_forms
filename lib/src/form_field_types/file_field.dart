@@ -51,6 +51,12 @@ sealed class FileModel with EquatableMixin {
   @override
   List<Object?> get props => [data, path, size, name];
 
+  String toJSON() {
+    assert(this is UrlFile, "You are trying to parse a file that is not an instance of "
+        "UrlFile as a json entry");
+    return path!;
+  }
+
 }
 
 class BytesFile extends FileModel {
@@ -67,13 +73,15 @@ class BytesFile extends FileModel {
 
 class UrlFile extends FileModel {
 
-  UrlFile({
+  const UrlFile({
     required String url,
     super.extension,
     String? name,
     int? size,
     super.metadata,
-  }) : super._(path: url, data: null,  size: size ?? -1, name: name ?? url.split("/").last);
+  }) : super._(path: url, data: null,  size: size ?? -1,
+      name: name ?? url
+  );
 
   @override
   String get path => super.path as String;
