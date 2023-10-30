@@ -8,6 +8,9 @@ import '../../utils.dart';
 
 final class TextFieldConfiguration extends BaseTextFormFieldConfiguration {
 
+  /// If > 1, the field will have a height = defaultHeight * maxLines (It does not limit the number of lines from the input)
+  final int maxLines;
+
  const TextFieldConfiguration({
     super.label,
     super.flex,
@@ -15,6 +18,7 @@ final class TextFieldConfiguration extends BaseTextFormFieldConfiguration {
     //String? regexFormatterPattern,
     super.suffixIcon,
     super.formatter,
+    this.maxLines = 1,
 }) : super(
     type: AvailableTextFieldInputTypes.text,
     isObscure: false,
@@ -128,6 +132,8 @@ final class TextFieldState extends BaseTextFieldState {
        configuration: TextFieldConfiguration.fromJSON(json),
    );
 
+   @override
+   TextFieldConfiguration get configuration => super.configuration as TextFieldConfiguration;
 
   @override
   bool validator(String? v) => v != null && v.isNotEmpty;

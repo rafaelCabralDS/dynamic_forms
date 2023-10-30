@@ -227,6 +227,7 @@ final class FilePickerFieldState extends DynamicFormFieldState<List<FileModel>> 
 
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
+          withData: true, // save in the memory
           allowedExtensions: SupportedFiles.asExtensionList(configuration.supportedInputFiles),
           allowMultiple: configuration.multiplePicks,
       );

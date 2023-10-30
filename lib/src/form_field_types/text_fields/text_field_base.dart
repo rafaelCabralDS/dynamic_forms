@@ -215,13 +215,17 @@ class _DefaultTextFieldBuilderState extends State<DefaultTextFieldBuilder> {
 
 
     return SizedBox(
-      height: 60.0,
+      height: 60.0 * (widget.state.configuration is TextFieldConfiguration ? (widget.state.configuration as TextFieldConfiguration).maxLines : 1),
       child: TextField(
         controller: _editingController,
         onChanged: (v) => widget.state.value = v,
         obscureText: widget.state.hidden,
         inputFormatters: widget.state.configuration.formatter != null ? [widget.state.configuration.formatter!] : null,
         enabled: widget.state.enabled,
+        maxLines: null,
+        minLines: null,
+        expands: widget.state.configuration is TextFieldConfiguration
+            ? (widget.state.configuration as TextFieldConfiguration).maxLines > 1 : false,
         decoration: InputDecoration(
             labelText: widget.state.configuration.label ?? widget.state.key,
             errorText: widget.state.error,
@@ -230,6 +234,7 @@ class _DefaultTextFieldBuilderState extends State<DefaultTextFieldBuilder> {
         ),
       ),
     );
+
   }
 }
 

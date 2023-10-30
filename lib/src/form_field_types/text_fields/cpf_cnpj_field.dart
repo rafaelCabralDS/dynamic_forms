@@ -101,8 +101,6 @@ final class CpfFieldState extends BaseTextFieldState {
   }
 
 
-
-
 }
 
 

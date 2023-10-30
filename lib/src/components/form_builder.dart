@@ -62,7 +62,7 @@ class DynamicForm extends StatelessWidget {
   }
 }
 
-typedef DynamicFormFieldBuilder<T> = Widget Function(DynamicFormFieldState<T> field);
+typedef DynamicFormFieldBuilder<T extends DynamicFormFieldState> = Widget Function(T field);
 
 /// This can build any [DynamicFormFieldState], deciding witch widget should be built
 /// based on the [FormFieldType] parameter of the [FormFieldConfiguration] from the field state,

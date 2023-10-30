@@ -62,11 +62,16 @@ final class DropdownFieldState<T extends Object> extends DynamicFormFieldState<T
 
 
   @override
-  bool get isValid => value != null;
-
+  bool validator(T? v) {
+    return _options.contains(v);
+  }
 
   @override
-  bool validator(T? v) => _options.contains(v);
+  bool validate([String invalidMsg = "Campo inválido"]) {
+    if (isValid && error != null) error = null;
+    if (!isValid && error == null) error = invalidMsg;
+    return isValid;
+  }
 
   @override
   DropdownFieldConfiguration get configuration => super.configuration as DropdownFieldConfiguration;
