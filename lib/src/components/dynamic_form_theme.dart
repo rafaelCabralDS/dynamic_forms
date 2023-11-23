@@ -154,8 +154,8 @@ class DynamicFormThemeData with Diagnosticable {
   static Widget defaultSwitchFormFieldBuilder(SwitchFieldState state) => DefaultSwitchFieldBuilder(state: state);
   static Widget defaultDropdownFormFieldBuilder<T extends Object>(DropdownFieldState<T> state) => DefaultDropdownFieldBuilder(state: state);
   static Widget defaultFilePickerFormFieldBuilder(FilePickerFieldState state) => DefaultFilePickerBuilder(state: state);
-  static Widget defaultFormHeaderBuilder(FormModel form) => DefaultFormHeaderBuilder(form: form);
-  static Widget defaultSubformHeaderBuilder(FormModel subform) => DefaultSubFormHeaderBuilder(subform: subform);
+  static Widget defaultFormHeaderBuilder(FormModel form, int i) => DefaultFormHeaderBuilder(form: form);
+  static Widget defaultSubformHeaderBuilder(FormModel subform, int i) => DefaultSubFormHeaderBuilder(subform: subform);
   static Widget defaultExpandableFieldBuilder(ExpandableBaseFieldState state) => BuildExpandableField(state: state);
   static Widget defaultAutocompleteFieldBuilder(AutocompleteFieldState state) => AutocompleteFieldBuilder(state: state);
 

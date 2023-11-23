@@ -57,6 +57,9 @@ sealed class FileModel with EquatableMixin {
     return path!;
   }
 
+  @override
+  String toString() => "${runtimeType}(name: $name, size: $size, path $path, extension: $extension, metadata: $metadata";
+
 }
 
 class BytesFile extends FileModel {

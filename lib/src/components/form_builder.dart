@@ -39,7 +39,7 @@ class DynamicForm extends StatelessWidget {
                       itemBuilder: (_,i) => AnimatedBuilder(
                         animation: forms[i],
                         builder: (context, child) {
-                          return FormBuilder(form: forms[i]);
+                          return FormBuilder(form: forms[i], i: i);
                         }
                       ),
                       separatorBuilder: (_,i) => SizedBox(height: theme.verticalSpacing),
@@ -122,15 +122,19 @@ class FieldBuilder extends StatelessWidget {
   }
 }
 
-typedef FormHeaderBuilder = Widget Function(FormModel form);
+typedef FormHeaderBuilder = Widget Function(FormModel form, int i);
 
 class FormBuilder extends StatelessWidget {
 
   final FormModel form;
 
+  /// The index of the form in the controller
+  final int i;
+
   const FormBuilder({
     super.key,
     required this.form,
+    this.i = 0,
   });
 
 
@@ -143,7 +147,7 @@ class FormBuilder extends StatelessWidget {
       children: [
 
         if (form.title != null || form.desc != null)
-         style.formHeaderBuilder(form),
+         style.formHeaderBuilder(form, i),
 
         FormFieldsBuilder(fields: form.fieldsMatrix, style: style),
 
@@ -152,7 +156,7 @@ class FormBuilder extends StatelessWidget {
           itemBuilder: (_,i) => AnimatedBuilder(
             animation: form.subforms[i],
             builder: (context, child) {
-              return SubformBuilder(subform: form.subforms[i]);
+              return SubformBuilder(subform: form.subforms[i], i: i);
             }
           ),
           separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
@@ -166,9 +170,11 @@ class FormBuilder extends StatelessWidget {
 class SubformBuilder extends StatelessWidget {
 
   final FormModel subform;
+  final int i;
 
   const SubformBuilder({super.key,
     required this.subform,
+    this.i = 0,
   });
 
   @override
@@ -183,13 +189,13 @@ class SubformBuilder extends StatelessWidget {
         SizedBox(height: style.verticalSpacing),
 
         if ((subform.title != null && subform.title!.isNotEmpty) || (subform.desc != null && subform.desc!.isNotEmpty))
-          style.subformHeaderBuilder(subform),
+          style.subformHeaderBuilder(subform, i),
 
         FormFieldsBuilder(fields: subform.fieldsMatrix, style: style),
 
         SeparatedColumn(
           data: subform.subforms,
-          itemBuilder: (_,i) => SubformBuilder(subform: subform.subforms[i]),
+          itemBuilder: (_,i) => SubformBuilder(subform: subform.subforms[i], i: i),
           separatorBuilder: (_,i) => SizedBox(height: style.verticalSpacing),
         ),
 
@@ -243,6 +249,7 @@ class FormFieldsBuilder extends StatelessWidget {
 class DefaultFormHeaderBuilder extends StatelessWidget {
 
   final FormModel form;
+
   const DefaultFormHeaderBuilder({super.key, required this.form});
 
   @override
