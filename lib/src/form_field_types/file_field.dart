@@ -2,7 +2,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import '../utils.dart';
-
+import 'package:mime_type/mime_type.dart';
 export 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
 import 'package:dynamic_forms/dynamic_forms.dart';
@@ -26,6 +26,7 @@ sealed class FileModel with EquatableMixin {
   final Uint8List? data;
   final String? path;
   final Map<String,String>? metadata;
+  String? get contentType => mime(name);
 
   final int size;
   final String name;
@@ -49,7 +50,7 @@ sealed class FileModel with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [data, path, size, name];
+  List<Object?> get props => [data, path, size, name, contentType];
 
   String toJSON() {
     assert(this is UrlFile, "You are trying to parse a file that is not an instance of "
@@ -58,7 +59,7 @@ sealed class FileModel with EquatableMixin {
   }
 
   @override
-  String toString() => "${runtimeType}(name: $name, size: $size, path $path, extension: $extension, metadata: $metadata";
+  String toString() => "$runtimeType(name: $name, size: $size, path $path, extension: $extension, metadata: $metadata";
 
 }
 
@@ -411,4 +412,97 @@ class _DefaultFilePickerBuilderState extends State<DefaultFilePickerBuilder> {
 
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+final class ThumbnailConfiguration extends FormFieldConfiguration {
+  const ThumbnailConfiguration() : super(formType: FormFieldType.file);
+}
+
+final class ThumbnailPickerFieldState extends DynamicFormFieldState<FileModel> {
+
+  ThumbnailPickerFieldState({
+    required super.key,
+    super.isRequired,
+    super.callback,
+    super.initialValue,
+    super.jsonEntryMapper,
+  }) :super(configuration: const ThumbnailConfiguration());
+
+
+  @override
+  void reset() {
+    value = null;
+    error = null;
+  }
+
+  Future<void> pick() async {
+
+    try {
+
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        withData: true, // save in the memory
+        allowedExtensions: SupportedFiles.image.extensions,
+        allowMultiple: false,
+      );
+
+      if (result == null) return;
+      var e = result.files.first;
+      value = BytesFile(
+        bytes: e.bytes,
+        name: e.name,
+        extension: e.extension,
+        size: e.size,
+      );
+      notifyListeners();
+
+    } catch (e) {
+      error = "nonNullErrorValue";
+    }
+
+  }
+
+  @override
+  bool validator(FileModel? v) => true;
+
+}
+
+
+
+class ImageFileStateBuilder extends StatelessWidget {
+
+  final ThumbnailPickerFieldState state;
+  final Widget emptyBuilder;
+  final Widget loadingBuilder;
+  final Widget errorBuilder;
+
+  const ImageFileStateBuilder({super.key,
+    required this.state,
+    this.emptyBuilder = const Icon(Icons.camera_enhance),
+    this.loadingBuilder = const CircularProgressIndicator(),
+    this.errorBuilder = const Icon(Icons.error_outline),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    return AnimatedBuilder(
+        animation: state,
+        builder: (context, child) {
+          var value = state.value;
+
+          return switch (value) {
+            null => emptyBuilder,
+            BytesFile() => Image.memory(value.data!),
+            UrlFile() => Image.network(value.path,
+              errorBuilder: (_, __, ___) => errorBuilder,
+            ),
+            CorruptedFile() => const SizedBox.shrink(),
+          };
+        }
+    );
+  }
+}
+
 

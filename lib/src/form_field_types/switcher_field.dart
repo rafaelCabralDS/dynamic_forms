@@ -39,7 +39,7 @@ final class SwitchFieldState extends DynamicFormFieldState<bool> {
 final class SwitcherFieldConfiguration extends FormFieldConfiguration {
   static const String KEY_DESCRIPTION = "description";
 
-  final TextSpan? description;
+  final String? description;
 
   const SwitcherFieldConfiguration({
     super.label,
@@ -53,7 +53,7 @@ final class SwitcherFieldConfiguration extends FormFieldConfiguration {
     return SwitcherFieldConfiguration(
         label: json[FormFieldConfiguration.KEY_LABEL],
         flex: json[FormFieldConfiguration.KEY_FLEX],
-        description: TextSpan(text: json[KEY_DESCRIPTION])
+        description: json[KEY_DESCRIPTION]
     );
   }
 }
@@ -79,8 +79,15 @@ class DefaultSwitchFieldBuilder extends StatelessWidget {
           value: state.value,
           onChanged: (v) => state.value = !state.value,
         ),
-        if (state.configuration.description != null)
-          Text.rich(state.configuration.description!)
+
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (state.configuration.label != null) Text(state.configuration.label!, style: Theme.of(context).textTheme.titleSmall),
+            if (state.configuration.description != null) Text(state.configuration.description!, style: Theme.of(context).textTheme.displaySmall)
+          ],
+        )
+
       ],
     );
   }
